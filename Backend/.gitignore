@@ -1,0 +1,39 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Logs
+logs
+*.log
+logs/*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build files
+build/
+dist/
+.DS_Store
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+
+# Misc
+*.cache
+*.tmp
+*.bak
