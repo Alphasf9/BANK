@@ -14,8 +14,14 @@ const bankStatementSchema = new mongoose.Schema({
     },
 
     period: {
-        startDate: { type: Date, required: true },
-        endDate: { type: Date, required: true }  
+        startDate: { 
+            type: Date, 
+            required: true 
+        },
+        endDate: { 
+            type: Date, 
+            required: true 
+        }  
     },
 
     transactions: [
