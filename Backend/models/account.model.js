@@ -50,6 +50,12 @@ const accountSchema = new mongoose.Schema({
         contact: {
             type: String
         }
+    },
+
+    accountPassword :{
+        type:String,
+        required : true,
+        select:false
     }
 }, { timestamps: true });
 

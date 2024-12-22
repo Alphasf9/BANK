@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+    
     firstName: {
         type: String,
         required: true
@@ -40,13 +41,10 @@ const userSchema = new mongoose.Schema({
         unique: true
     },
 
-    // preference: {
-    //     type: String,
-    //     enum: ["Saving", "Current"],
-    //     required: true
-    // },
-
     address: {
+        houseNumber:{
+            type:String,
+        },
         street: {
             type: String,
             required: true
@@ -89,7 +87,14 @@ const userSchema = new mongoose.Schema({
     photo: { // from cloudinary
         type: String,
         required: true
+    },
+    
+    userPassword :{
+        type:String,
+        required : true,
+        select:false
     }
+
 }, { timestamps: true });
 
 export const User = mongoose.model("User", userSchema);

@@ -52,7 +52,7 @@ const bankStatementSchema = new mongoose.Schema({
     statementStatus: {
         type: String,
         enum: ["Generated", "Pending", "Failed"],
-        default: "Generated",
+        default: "Pending",
         required: true
     }
 }, { timestamps: true });
