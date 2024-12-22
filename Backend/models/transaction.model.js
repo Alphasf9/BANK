@@ -12,6 +12,7 @@ const transactionSchema = new mongoose.Schema({
         ref: "Account",
         required: true
     },
+    
 
     type: {
         type: String,
@@ -41,10 +42,10 @@ const transactionSchema = new mongoose.Schema({
     //     required: true // E.g., "ATM Withdrawal", "Online Transfer"
     //   },
 
-    balanceAfterTransaction: {
-        type: Number,
-        required: true
-    },
+    // balanceAfterTransaction: {
+    //     type: Number,
+    //     required: true
+    // },
 
     status: {
         type: String,
