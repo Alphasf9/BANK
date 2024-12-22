@@ -23,12 +23,12 @@ const transactionSchema = new mongoose.Schema({
     amount: {
         type: Number,
         required: true,
-        validate: {
-            validator: function (value) {
-                return value > 0;
-            },
-            message: "Amount must be greater than zero."
-        }
+        // validate: {
+        //     validator: function (value) {
+        //         return value > 0;
+        //     },
+        //     message: "Amount must be greater than zero."
+        // }
     },
 
     transactionDate: {
@@ -42,15 +42,11 @@ const transactionSchema = new mongoose.Schema({
     //     required: true // E.g., "ATM Withdrawal", "Online Transfer"
     //   },
 
-    // balanceAfterTransaction: {
-    //     type: Number,
-    //     required: true
-    // },
 
     status: {
         type: String,
         enum: ["Pending", "Completed", "Failed"],
-        default: "Completed",
+        default: "Pending",
         required: true
     }
 }, { timestamps: true });

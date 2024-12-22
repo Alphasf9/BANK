@@ -46,6 +46,12 @@ const loanSchema = new mongoose.Schema({
         required: true
     },
 
+    monthlyPaidAmount: {
+        type: [Boolean], // This defines an array of Boolean values
+        default:0,
+        required:true
+    },
+
     outstandingBalance: {
         type: Number,
         default: function () {
