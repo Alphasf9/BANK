@@ -3,13 +3,13 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
-    
+
     fullName: {
         firstName: {
             type: String,
             required: true
         },
-    
+
         lastName: {
             type: String,
             required: true
@@ -92,32 +92,38 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    
-    userPassword :{
-        type:String,
-        required : true,
-        select:false
+
+    userPassword: {
+        type: String,
+        required: true,
+        select: false
     }
 
 }, { timestamps: true });
 
-userSchema.pre("save", async function (next) {
-    if (this.isModified("userPassword")) {
-        this.userPassword = await bcrypt.hash(this.userPassword, 10);
-    }
-    next();
-});
+// userSchema.pre("save", async function (next) {
+//     if (this.isModified("userPassword")) {
+//         this.userPassword = await bcrypt.hash(this.userPassword, 10);
+//         console.log("Hashed Password:", this.userPassword);
+//         console.log("Plain Password:", userPassword);
+//     }
+//     next();
+// });
+
+userSchema.statics.hashPassword=async function(userPassword){
+    return await bcrypt.hash(userPassword, 10);
+}
 
 
-userSchema.methods.passowrdCorrect = async function (userPassword) {
+userSchema.methods.passwordCorrect = async function (userPassword) {
     return await bcrypt.compare(userPassword, this.userPassword)// comparing password
 }
 
 
-userSchema.methods.genrateAccessToken = function(){
+userSchema.methods.genrateAccessToken = function () {
     return jwt.sign(
         {
-            _id : this._id,
+            _id: this._id,
             email: this.email,
             fullName: this.fullName
         },
@@ -128,10 +134,10 @@ userSchema.methods.genrateAccessToken = function(){
     )
 }
 
-userSchema.methods.genrateRefreshToken = function(){
+userSchema.methods.genrateRefreshToken = function () {
     return jwt.sign(
         {
-            _id : this._id
+            _id: this._id
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
