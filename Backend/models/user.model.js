@@ -1,3 +1,4 @@
+import { jwt } from "jsonwebtoken";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -96,5 +97,32 @@ const userSchema = new mongoose.Schema({
     }
 
 }, { timestamps: true });
+
+
+userSchema.methods.genrateAccessToken = function(){
+    return jwt.sign(
+        {
+            _id : this._id,
+            email: this.email,
+            fullName: this.fullName
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+}
+
+userSchema.methods.genrateRefreshToken = function(){
+    return jwt.sign(
+        {
+            _id : this._id
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
 
 export const User = mongoose.model("User", userSchema);
