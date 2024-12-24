@@ -1,4 +1,4 @@
-import { jwt } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -87,10 +87,10 @@ const userSchema = new mongoose.Schema({
         required: true
     },
 
-    photo: { // from cloudinary
-        type: String,
-        required: true
-    },
+    // photo: { // from cloudinary
+    //     type: String,
+    //     required: true
+    // },
     
     userPassword :{
         type:String,
