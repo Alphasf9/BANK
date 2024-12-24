@@ -38,8 +38,8 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "All fields are required." });
         }
 
-        const existedUser = await User.findOne({ 
-            $or: [{aadhar_id}, {email}]
+        const existedUser = await User.findOne({
+            $or: [{ aadhar_id }, { email }]
         });
         if (existedUser) {
             return res.status(400).json({ message: "User already exists." });
@@ -95,60 +95,71 @@ const registerUser = async (req, res) => {
     }
 };
 
-const genrateAccessTokenRefreshToken = async(userId) => {
+const genrateAccessTokenRefreshToken = async (userId) => {
     const user = await User.findById(userId)
     const accessToken = user.genrateAccessToken()
     const refreshToken = user.genrateRefreshToken()
 
     user.refreshToken = refreshToken
-    await user.save({validateBeforeSave: false})
+    await user.save({ validateBeforeSave: false })
 
-    return {accessToken, refreshToken};
+    return { accessToken, refreshToken };
 }
 
 const loginUser = async (req, res) => {
-    const {email, aadhar_id, userPassword} = req.body
+    try {
+        const { email, aadhar_id, userPassword } = req.body
 
-    if(!email || !aadhar_id) {
-        return res.status(400).json({ message: "email and aadhar is required" });
+        if (!email || !aadhar_id) {
+            return res.status(400).json({ message: "email and aadhar is required" });
+        }
+
+        const user = await User.findOne({
+            $or: [{ email }, { aadhar_id }]
+        }).select("+userPassword");
+
+        if (!user) {
+            return res.status(400).json({ message: "User not found" });
+        }
+
+        console.log("Stored password:", user.userPassword);
+        console.log("Input password:", userPassword);
+
+        const isPasswordMatch = await user.passwordCorrect(userPassword);
+        if (!isPasswordMatch) {
+            return res.status(400).json({ message: "Invalid password" });
+        }
+
+
+
+        const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(user._id);
+
+        const loggedInUser = await User.findById(user._id).select("-userPassword -refreshToken");
+
+        const option = {
+            httpOnly: true,
+            secure: true
+        }
+
+        return res.status(200).cookie("accessToken", accessToken, option).cookie("refreshToken", refreshToken, option)
+            .json({ user: loggedInUser, accessToken, refreshToken, message: "User LoggedIn Successfully" })
+
+    } catch (error) {
+        console.error("Login Error: ", error);
+        return res.status(500).json({ message: "An unexpected error occurred" });
     }
-
-    const user = await User.findOne({
-        $or: [{email}, {aadhar_id}]
-    }).select("+userPassword");
-    if(!user) {
-        return res.status(400).json({message: "User not found"});
-    }
-
-    const isPasswordMatch = await user.passowrdCorrect(userPassword);
-    if(!isPasswordMatch){
-        res.status(400).json({message: "Password is invalid"})
-    }
-
-    const {accessToken, refreshToken} = await genrateAccessTokenRefreshToken(user._id);
-
-    const loggedInUser = await User.findById(user._id).select("-userPassword -refreshToken");
-
-    const option = {
-        httpOnly: true,
-        secure: true
-    }
-
-    return res.status(200).cookie("accessToken", accessToken, option).cookie("refreshToken", refreshToken, option)
-    .json({user: loggedInUser, accessToken, refreshToken, message: "User LoggedIn Successfully"})
-
 }
 
 const logoutUser = async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
+            $set: {
                 refreshToken: undefined
             }
         },
         {
-            new : true
+            new: true
         }
     )
 
@@ -158,7 +169,7 @@ const logoutUser = async (req, res) => {
     }
 
     return res.status(200).clearCookie("accessToken", accessToken, option).clearCookie("refreshToken", refreshToken, option)
-    .json({user: {}, message: "User LoggedOut Successfully"})
+        .json({ user: {}, message: "User LoggedOut Successfully" })
 
 }
 
