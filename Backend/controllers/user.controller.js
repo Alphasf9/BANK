@@ -191,6 +191,7 @@ const logoutUser = async (req, res) => {
             new: true
         }
     )
+    const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(req.user._id);
 
     const option = {
         httpOnly: true,
