@@ -128,7 +128,7 @@ const loginUser = async (req, res, next) => {
     try {
         const { email, aadhar_id, userPassword } = req.body;
 
-        console.log('email aadhar_id', req.body);
+        
 
         
         if (!email || !aadhar_id) {
