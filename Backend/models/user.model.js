@@ -87,10 +87,10 @@ const userSchema = new mongoose.Schema({
         required: true
     },
 
-    // photo: { // from cloudinary
-    //     type: String,
-    //     required: true
-    // },
+    photo: { // from cloudinary
+        type: String,
+        required: true
+    },
     
     userPassword :{
         type:String,

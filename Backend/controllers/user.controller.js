@@ -6,29 +6,22 @@ import bcrypt from "bcrypt"
 const registerUser = async (req, res) => {
     try {
 
-        const { firstName, lastName, email, phoneNo, dob, gender, aadhar_id, houseNumber, street, city, state, zip, country, maritalStatus, occupation, nationality, userPassword } = req.body;
+        const { fullName, email, phoneNo, dob, gender, aadhar_id, address, maritalStatus, occupation, nationality, userPassword } = req.body;
 
         console.log(req.body)
+        console.log("***");
+        
+        console.log(address);
+        
 
         if (
-            !firstName ||
-            !lastName ||
+            !fullName ||
             !email ||
             !phoneNo ||
-            !dob ||
-            !gender ||
-            !aadhar_id ||
-            !street ||
-            !city ||
-            !state ||
-            !zip ||
-            !country ||
-            !maritalStatus ||
-            !occupation ||
-            !nationality ||
+            !address ||
             !userPassword
         ) {
-            return res.status(400).json({ message: "All fields are required." });
+            // return res.status(400).json({ message: "All fields are required." });
         }
 
 
@@ -37,7 +30,7 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "User already exists." });
         }
 
-        const photoLocalPath = req.files?.photo?.[0]?.path;
+        const photoLocalPath = req.file?.path;
         console.log("photo path", photoLocalPath);
         
         if (!photoLocalPath) {
@@ -48,9 +41,9 @@ const registerUser = async (req, res) => {
         if (!photo) {
             return res.status(400).json({ message: "Photo is required" })
         }
-        console.log("hello")
+
         const hashedPassword = await bcrypt.hash(userPassword, 10);
-        console.log(hashedPassword)
+
 
         const user = await User.create({
             firstName: fullName.firstName,
@@ -61,16 +54,18 @@ const registerUser = async (req, res) => {
             gender,
             aadhar_id,
             street: address.street,
-            city: address.city,
             state: address.state,
+            city: address.city,
             zip: address.zip,
             country: address.country,
             maritalStatus,
             occupation,
             nationality,
-            // photo: photo.url,
+            photo: photo.url,
             userPassword: hashedPassword
         })
+        console.log(user);
+        
         // await user.save();
 
         const createdUser = await User.findById(user._id).select("-userPassword");
