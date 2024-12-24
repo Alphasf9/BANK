@@ -51,7 +51,7 @@ const registerUser = async (req, res) => {
 
 
         const existedUser = await User.findOne({
-            $or: [{ aadhar_id }, { email }],
+            $or: [{ aadhar_id }, { email }]
         });
         if (existedUser) {
             return res.status(400).json({ message: "User already exists." });
@@ -122,21 +122,25 @@ const registerUser = async (req, res) => {
     }
 };
 
+const genrateAccessTokenRefreshToken = async (userId) => {
+    const user = await User.findById(userId)
+    const accessToken = user.genrateAccessToken()
+    const refreshToken = user.genrateRefreshToken()
 
+    user.refreshToken = refreshToken
+    await user.save({ validateBeforeSave: false })
 
+    return { accessToken, refreshToken };
+}
 
-
-const loginUser = async (req, res, next) => {
+const loginUser = async (req, res) => {
     try {
-        const { email, aadhar_id, userPassword } = req.body;
-
-       
+        const { email, aadhar_id, userPassword } = req.body
 
         if (!email || !aadhar_id) {
-            return res.status(400).json({ message: "email and aadhar are required" });
+            return res.status(400).json({ message: "email and aadhar is required" });
         }
 
-      
         const user = await User.findOne({
             $or: [{ email }, { aadhar_id }]
         }).select("+userPassword");
@@ -145,39 +149,33 @@ const loginUser = async (req, res, next) => {
             return res.status(400).json({ message: "User not found" });
         }
 
+        console.log("Stored password:", user.userPassword);
+        console.log("Input password:", userPassword);
+
         const isPasswordMatch = await user.passwordCorrect(userPassword);
-
-        
-
         if (!isPasswordMatch) {
-            return res.status(400).json({ message: "Password is invalid" });
+            return res.status(400).json({ message: "Invalid password" });
         }
+
+
 
         const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(user._id);
 
         const loggedInUser = await User.findById(user._id).select("-userPassword -refreshToken");
 
-        const options = {
+        const option = {
             httpOnly: true,
-            secure: true,
-        };
+            secure: true
+        }
 
-        return res.status(200)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
-            .json({
-                user: loggedInUser,
-                accessToken,
-                refreshToken,
-                message: "User Logged In Successfully"
-            });
+        return res.status(200).cookie("accessToken", accessToken, option).cookie("refreshToken", refreshToken, option)
+            .json({ user: loggedInUser, accessToken, refreshToken, message: "User LoggedIn Successfully" })
 
     } catch (error) {
-        console.error("Error during logged in user:", error);
-        res.status(500).json({ message: "Internal server error." });
+        console.error("Login Error: ", error);
+        return res.status(500).json({ message: "An unexpected error occurred" });
     }
-};
-
+}
 
 const logoutUser = async (req, res) => {
     await User.findByIdAndUpdate(
