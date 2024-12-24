@@ -1,59 +1,95 @@
 import { User } from "../models/user.model.js";
-import { ApiError } from "../utils/ApiError.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import bcrypt from "bcrypt"
 
 
-const registerUser = asyncHandler(async (req, res) => {
-    const { fullName, email, phoneNo, dob, gender, aadhar_id, address, maritalStatus, occupation, nationality, photo, userPassword } = req.body;
+const registerUser = async (req, res) => {
+    try {
 
-    if (!fullName || !email || !phoneNo || !dob || !gender || !aadhar_id || !address || !maritalStatus || !occupation || !nationality || !photo || !userPassword) {
-        throw new ApiError(400, "All fields are required.");
+        const { firstName, lastName, email, phoneNo, dob, gender, aadhar_id, houseNumber, street, city, state, zip, country, maritalStatus, occupation, nationality, userPassword } = req.body;
+
+        console.log(req.body)
+
+        if (
+            !firstName ||
+            !lastName ||
+            !email ||
+            !phoneNo ||
+            !dob ||
+            !gender ||
+            !aadhar_id ||
+            !street ||
+            !city ||
+            !state ||
+            !zip ||
+            !country ||
+            !maritalStatus ||
+            !occupation ||
+            !nationality ||
+            !userPassword
+        ) {
+            return res.status(400).json({ message: "All fields are required." });
+        }
+
+
+        const existedUser = await User.findOne({ aadhar_id });
+        if (existedUser) {
+            return res.status(400).json({ message: "User already exists." });
+        }
+
+        const photoLocalPath = req.files?.photo?.[0]?.path;
+        console.log("photo path", photoLocalPath);
+        
+        if (!photoLocalPath) {
+            return res.status(400).json({ message: "Photo file is required." });
+        }
+
+        const photo = await uploadOnCloudinary(photoLocalPath);
+        if (!photo) {
+            return res.status(400).json({ message: "Photo is required" })
+        }
+        console.log("hello")
+        const hashedPassword = await bcrypt.hash(userPassword, 10);
+        console.log(hashedPassword)
+
+        const user = await User.create({
+            firstName: fullName.firstName,
+            lastName: fullName.lastName,
+            email,
+            phoneNo,
+            dob,
+            gender,
+            aadhar_id,
+            street: address.street,
+            city: address.city,
+            state: address.state,
+            zip: address.zip,
+            country: address.country,
+            maritalStatus,
+            occupation,
+            nationality,
+            // photo: photo.url,
+            userPassword: hashedPassword
+        })
+        // await user.save();
+
+        const createdUser = await User.findById(user._id).select("-userPassword");
+        if (!createdUser) {
+            return res.status(500).json({ message: "Somthing went worng while requesting user" })
+        }
+
+        return res.status(201).json(
+            {
+                message: "User Register Successfully",
+                user: createdUser
+            }
+        )
+
+    } catch (error) {
+        console.error("Error during user registration:", error);
+        res.status(500).json({ message: "Internal server error." });
     }
 
-    const existedUser = await User.findOne({ aadhar_id });
-    if (existedUser) {
-        throw new ApiError(409, "User with this Aadhar is already exists")
-    }
-
-    const photoLocalPath = req.files?.photo[0]?.path;
-    if (!photoLocalPath) {
-        throw new ApiError(400, "Photo file is Required")
-    }
-
-    const photoUser = await uploadOnCloudinary(photoLocalPath);
-    if (!photoUser) {
-        throw new ApiError(400, "Photo is required")
-    }
-
-    const hashedPassword = await bcrypt.hash(userPassword, 10);
-
-    const user = await User.create({
-        fullName: { firstName, lastName },
-        email,
-        phoneNo,
-        dob,
-        gender,
-        aadhar_id,
-        address,
-        maritalStatus,
-        occupation,
-        nationality,
-        photo : photoUser.url,
-        userPassword: hashedPassword
-    })
-    await user.save();
-
-    const createdUser = await User.findById(user._id).select("-userPassword");
-    if(!createdUser) {
-        throw new ApiError(500, "Somthing went worng while requesting user")
-    }
-
-    return res.status(201).json(
-        new ApiResponse(200, createdUser, "User Register Successfully")
-    )
-
-})
+}
 
 export { registerUser }
