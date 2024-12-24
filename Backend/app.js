@@ -7,6 +7,7 @@ import userRouter from "./routes/user.route.js";
 const app = express();
 dotenv.config();
 
+
 //connection of DB
 connectDB();
 const port = process.env.PORT || 3000;
