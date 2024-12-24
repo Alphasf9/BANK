@@ -44,7 +44,6 @@ const registerUser = async (req, res) => {
         }
 
         const photoLocalPath = req.file?.path;
-        console.log("photo path", photoLocalPath);
 
         if (!photoLocalPath) {
             return res.status(400).json({ message: "Photo file is required." });
