@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
     
@@ -107,13 +108,11 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-/*************  ✨ Codeium Command ⭐  *************/
     /**
      * Compares given userPassword with hashed password stored in the db.
      * @param {string} userPassword - The password to compare.
      * @returns {Promise<boolean>} - true if the password matches, false otherwise.
      */
-/******  60fb5b0d-41e5-4d2a-90a9-a1e6e64cd4de  *******/
 userSchema.methods.passowrdCorrect = async function (userPassword) {
     return await bcrypt.compare(userPassword, this.userPassword)// comparing password
 }
