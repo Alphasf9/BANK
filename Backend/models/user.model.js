@@ -108,11 +108,7 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-    /**
-     * Compares given userPassword with hashed password stored in the db.
-     * @param {string} userPassword - The password to compare.
-     * @returns {Promise<boolean>} - true if the password matches, false otherwise.
-     */
+
 userSchema.methods.passowrdCorrect = async function (userPassword) {
     return await bcrypt.compare(userPassword, this.userPassword)// comparing password
 }
