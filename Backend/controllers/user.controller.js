@@ -38,7 +38,9 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "All fields are required." });
         }
 
-        const existedUser = await User.findOne({ aadhar_id });
+        const existedUser = await User.findOne({ 
+            $or: [{aadhar_id}, {email}]
+        });
         if (existedUser) {
             return res.status(400).json({ message: "User already exists." });
         }
@@ -93,5 +95,71 @@ const registerUser = async (req, res) => {
     }
 };
 
+const genrateAccessTokenRefreshToken = async(userId) => {
+    const user = await User.findById(userId)
+    const accessToken = user.genrateAccessToken()
+    const refreshToken = user.genrateRefreshToken()
 
-export { registerUser }
+    user.refreshToken = refreshToken
+    await user.save({validateBeforeSave: false})
+
+    return {accessToken, refreshToken};
+}
+
+const loginUser = async (req, res) => {
+    const {email, aadhar_id, userPassword} = req.body
+
+    if(!email || !aadhar_id) {
+        return res.status(400).json({ message: "email and aadhar is required" });
+    }
+
+    const user = await User.findOne({
+        $or: [{email}, {aadhar_id}]
+    }).select("+userPassword");
+    if(!user) {
+        return res.status(400).json({message: "User not found"});
+    }
+
+    const isPasswordMatch = await user.passowrdCorrect(userPassword);
+    if(!isPasswordMatch){
+        res.status(400).json({message: "Password is invalid"})
+    }
+
+    const {accessToken, refreshToken} = await genrateAccessTokenRefreshToken(user._id);
+
+    const loggedInUser = await User.findById(user._id).select("-userPassword -refreshToken");
+
+    const option = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res.status(200).cookie("accessToken", accessToken, option).cookie("refreshToken", refreshToken, option)
+    .json({user: loggedInUser, accessToken, refreshToken, message: "User LoggedIn Successfully"})
+
+}
+
+const logoutUser = async (req, res) => {
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                refreshToken: undefined
+            }
+        },
+        {
+            new : true
+        }
+    )
+
+    const option = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res.status(200).clearCookie("accessToken", accessToken, option).clearCookie("refreshToken", refreshToken, option)
+    .json({user: {}, message: "User LoggedOut Successfully"})
+
+}
+
+export { registerUser, loginUser, logoutUser }
