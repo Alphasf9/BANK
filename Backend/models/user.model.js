@@ -1,16 +1,19 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    
-    firstName: {
-        type: String,
-        required: true
+
+    fullname: {
+        firstName: {
+            type: String,
+            required: true
+        },
+
+        lastName: {
+            type: String,
+            required: true
+        },
     },
 
-    lastName: {
-        type: String,
-        required: true
-    },
 
     email: {
         type: String,
@@ -38,12 +41,12 @@ const userSchema = new mongoose.Schema({
     aadhar_id: {
         type: String,
         required: true,
-        unique: true
+        unique: true  // By KK
     },
 
     address: {
-        houseNumber:{
-            type:String,
+        houseNumber: {
+            type: String,
         },
         street: {
             type: String,
@@ -88,11 +91,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    
-    userPassword :{
-        type:String,
-        required : true,
-        select:false
+
+    userPassword: {
+        type: String,
+        required: true,
+        select: false
     }
 
 }, { timestamps: true });
