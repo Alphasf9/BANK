@@ -101,18 +101,12 @@ const userSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// userSchema.pre("save", async function (next) {
-//     if (this.isModified("userPassword")) {
-//         this.userPassword = await bcrypt.hash(this.userPassword, 10);
-//         console.log("Hashed Password:", this.userPassword);
-//         console.log("Plain Password:", userPassword);
-//     }
-//     next();
-// });
-
-userSchema.statics.hashPassword=async function(userPassword){
-    return await bcrypt.hash(userPassword, 10);
-}
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("userPassword")) return next();
+    
+    this.userPassword = await bcrypt.hash(this.userPassword, 10);
+    next();
+});
 
 
 userSchema.methods.passwordCorrect = async function (userPassword) {
