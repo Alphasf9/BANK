@@ -128,14 +128,10 @@ const loginUser = async (req, res, next) => {
     try {
         const { email, aadhar_id, userPassword } = req.body;
 
-        
-
-        
         if (!email || !aadhar_id) {
             return res.status(400).json({ message: "email and aadhar are required" });
         }
 
-        
         const user = await User.findOne({
             $or: [{ email }, { aadhar_id }]
         }).select("+userPassword");
@@ -144,7 +140,6 @@ const loginUser = async (req, res, next) => {
             return res.status(400).json({ message: "User not found" });
         }
 
-        
         const isPasswordMatch = await user.passwordCorrect(userPassword);
         if (!isPasswordMatch) {
             return res.status(400).json({ message: "Password is invalid" });
@@ -203,4 +198,8 @@ const logoutUser = async (req, res) => {
 
 }
 
-export { registerUser, loginUser, logoutUser }
+const getCurrentUser = async(req, res) => {
+    return res.status(200).json({user:req.user, message: "Current user fetch Successfully"});
+}
+
+export { registerUser, loginUser, logoutUser, getCurrentUser }
