@@ -123,7 +123,6 @@ const registerUser = async (req, res) => {
 };
 
 
-
 const loginUser = async (req, res, next) => {
     try {
         const { email, aadhar_id, userPassword } = req.body;
@@ -145,10 +144,10 @@ const loginUser = async (req, res, next) => {
             return res.status(400).json({ message: "Password is invalid" });
         }
 
-        
+
         const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(user._id);
 
-       
+
         const loggedInUser = await User.findById(user._id).select("-userPassword -refreshToken");
 
         const options = {
@@ -156,7 +155,7 @@ const loginUser = async (req, res, next) => {
             secure: true,
         };
 
-        
+
         return res.status(200)
             .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
@@ -198,8 +197,112 @@ const logoutUser = async (req, res) => {
 
 }
 
-const getCurrentUser = async(req, res) => {
-    return res.status(200).json({user:req.user, message: "Current user fetch Successfully"});
+const getCurrentUser = async (req, res) => {
+    return res.status(200).json({ user: req.user, message: "Current user fetch Successfully" });
 }
 
-export { registerUser, loginUser, logoutUser, getCurrentUser }
+const changePassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body
+    const user = await User.findById(req.user?._id)
+
+    const isPasswordCorrect = await user.passwordCorrect(oldPassword);
+
+    if (!isPasswordCorrect) {
+        return res.status(401).json({ message: "Password not matched" })
+    }
+
+    user.userPassword = newPassword;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json({ message: "Password changed" });
+}
+
+const updatePersonalDetails = async (req, res) => {
+    const {
+        firstName,
+        lastName,
+        email,
+        phoneNo,
+        dob,
+        gender,
+        houseNumber,
+        street,
+        city,
+        state,
+        zip,
+        maritalStatus,
+        occupation,
+    } = req.body;
+
+    if (
+        !firstName ||
+        !lastName ||
+        !email ||
+        !phoneNo ||
+        !dob ||
+        !gender ||
+        !street ||
+        !city ||
+        !state ||
+        !zip ||
+        !maritalStatus ||
+        !occupation
+    ) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const user = User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                firstName,
+                lastName,
+                email,
+                phoneNo,
+                dob,
+                gender,
+                houseNumber,
+                street,
+                city,
+                state,
+                zip,
+                maritalStatus,
+                occupation,
+            }
+        },
+        {
+            new: true
+        }
+    ).select("-password");
+
+    return res.status(200).json({message: "Personal Details Updated"});
+}
+
+const updateUserPhoto = async (req, res) => {
+    const photoLocalPath = req.file?.path
+    if(!photoLocalPath) {
+        return res.status(401).json({message:"Photo file required"})
+    }
+
+    const photo = await uploadOnCloudinary(photoLocalPath);
+
+    if(!photo.url) {
+        return res.status(401).json({message: "Error while uploading on cloudinary"});
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set:{
+                photo: photo.url
+            }
+        },
+        {
+            new: true
+        }
+    ).select("-password");
+
+    return res.status(200).json({message: "Photo Updated"});
+}
+
+export { registerUser, loginUser, logoutUser, getCurrentUser, changePassword, updatePersonalDetails, updateUserPhoto }
