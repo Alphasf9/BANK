@@ -220,9 +220,36 @@ const changePassword = async (req, res) => {
 }
 
 const updatePersonalDetails = async (req, res) => {
-    const { firstName, lastName, email, phoneNo, maritalStatus, occupation } = req.body;
+    const {
+        firstName,
+        lastName,
+        email,
+        phoneNo,
+        dob,
+        gender,
+        houseNumber,
+        street,
+        city,
+        state,
+        zip,
+        maritalStatus,
+        occupation,
+    } = req.body;
 
-    if (!firstName || !lastName || !email || !phoneNo || !maritalStatus || !occupation) {
+    if (
+        !firstName ||
+        !lastName ||
+        !email ||
+        !phoneNo ||
+        !dob ||
+        !gender ||
+        !street ||
+        !city ||
+        !state ||
+        !zip ||
+        !maritalStatus ||
+        !occupation
+    ) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -234,6 +261,13 @@ const updatePersonalDetails = async (req, res) => {
                 fullName: { firstName, lastName },
                 email,
                 phoneNo,
+                dob,
+                gender,
+                houseNumber,
+                street,
+                city,
+                state,
+                zip,
                 maritalStatus,
                 occupation,
             },
