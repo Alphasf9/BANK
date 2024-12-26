@@ -220,45 +220,65 @@ const changePassword = async (req, res) => {
 }
 
 const updatePersonalDetails = async (req, res) => {
-    const { firstName, lastName, email, phoneNo, maritalStatus, occupation } = req.body;
+    const {
+        firstName,
+        lastName,
+        email,
+        phoneNo,
+        dob,
+        gender,
+        houseNumber,
+        street,
+        city,
+        state,
+        zip,
+        maritalStatus,
+        occupation,
+    } = req.body;
 
-    if (!firstName || !lastName || !email || !phoneNo || !maritalStatus || !occupation) {
+    if (
+        !firstName ||
+        !lastName ||
+        !email ||
+        !phoneNo ||
+        !dob ||
+        !gender ||
+        !street ||
+        !city ||
+        !state ||
+        !zip ||
+        !maritalStatus ||
+        !occupation
+    ) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
-    try {
-      
-        const user = await User.findByIdAndUpdate(
-            req.user._id,
-            {
-                fullName: { firstName, lastName },
+    const user = User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                firstName,
+                lastName,
                 email,
                 phoneNo,
+                dob,
+                gender,
+                houseNumber,
+                street,
+                city,
+                state,
+                zip,
                 maritalStatus,
                 occupation,
-            },
-            {
-                new: true, 
-                runValidators: true,
             }
-        ).select("-password"); 
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
+        },
+        {
+            new: true
         }
+    ).select("-password");
 
-
-        return res.status(200).json({
-            user,
-            message: "User has been updated",
-        });
-    } catch (error) {
-       
-        console.error(error);
-        return res.status(500).json({ error: error.message });
-    }
-};
-
+    return res.status(200).json({message: "Personal Details Updated"});
+}
 
 const updateUserPhoto = async (req, res) => {
     const photoLocalPath = req.file?.path
