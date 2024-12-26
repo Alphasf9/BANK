@@ -128,6 +128,8 @@ const loginUser = async (req, res, next) => {
     try {
         const { email, aadhar_id, userPassword } = req.body;
 
+
+
         if (!email || !aadhar_id) {
             return res.status(400).json({ message: "email and aadhar are required" });
         }
@@ -145,10 +147,10 @@ const loginUser = async (req, res, next) => {
             return res.status(400).json({ message: "Password is invalid" });
         }
 
-        
+
         const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(user._id);
 
-       
+
         const loggedInUser = await User.findById(user._id).select("-userPassword -refreshToken");
 
         const options = {
@@ -156,7 +158,7 @@ const loginUser = async (req, res, next) => {
             secure: true,
         };
 
-        
+
         return res.status(200)
             .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
@@ -198,8 +200,8 @@ const logoutUser = async (req, res) => {
 
 }
 
-const getCurrentUser = async(req, res) => {
-    return res.status(200).json({user:req.user, message: "Current user fetch Successfully"});
+const getCurrentUser = async (req, res) => {
+    return res.status(200).json({ user: req.user, message: "Current user fetch Successfully" });
 }
 
 export { registerUser, loginUser, logoutUser, getCurrentUser }
