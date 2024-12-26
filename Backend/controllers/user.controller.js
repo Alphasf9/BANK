@@ -220,82 +220,62 @@ const changePassword = async (req, res) => {
 }
 
 const updatePersonalDetails = async (req, res) => {
-    const {
-        firstName,
-        lastName,
-        email,
-        phoneNo,
-        dob,
-        gender,
-        houseNumber,
-        street,
-        city,
-        state,
-        zip,
-        maritalStatus,
-        occupation,
-    } = req.body;
+    const { firstName, lastName, email, phoneNo, maritalStatus, occupation } = req.body;
 
-    if (
-        !firstName ||
-        !lastName ||
-        !email ||
-        !phoneNo ||
-        !dob ||
-        !gender ||
-        !street ||
-        !city ||
-        !state ||
-        !zip ||
-        !maritalStatus ||
-        !occupation
-    ) {
+    if (!firstName || !lastName || !email || !phoneNo || !maritalStatus || !occupation) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
-    const user = User.findByIdAndUpdate(
-        req.user._id,
-        {
-            $set: {
-                firstName,
-                lastName,
+    try {
+      
+        const user = await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                fullName: { firstName, lastName },
                 email,
                 phoneNo,
-                dob,
-                gender,
-                houseNumber,
-                street,
-                city,
-                state,
-                zip,
                 maritalStatus,
                 occupation,
+            },
+            {
+                new: true, 
+                runValidators: true,
             }
-        },
-        {
-            new: true
-        }
-    ).select("-password");
+        ).select("-password"); 
 
-    return res.status(200).json({message: "Personal Details Updated"});
-}
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+
+        return res.status(200).json({
+            user,
+            message: "User has been updated",
+        });
+    } catch (error) {
+       
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    }
+};
+
 
 const updateUserPhoto = async (req, res) => {
     const photoLocalPath = req.file?.path
-    if(!photoLocalPath) {
-        return res.status(401).json({message:"Photo file required"})
+    if (!photoLocalPath) {
+        return res.status(401).json({ message: "Photo file required" })
     }
 
     const photo = await uploadOnCloudinary(photoLocalPath);
 
-    if(!photo.url) {
-        return res.status(401).json({message: "Error while uploading on cloudinary"});
+    if (!photo.url) {
+        return res.status(401).json({ message: "Error while uploading on cloudinary" });
     }
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set:{
+            $set: {
                 photo: photo.url
             }
         },
@@ -304,7 +284,7 @@ const updateUserPhoto = async (req, res) => {
         }
     ).select("-password");
 
-    return res.status(200).json({message: "Photo Updated"});
+    return res.status(200).json({ message: "Photo Updated" });
 }
 
 export { registerUser, loginUser, logoutUser, getCurrentUser, changePassword, updatePersonalDetails, updateUserPhoto }

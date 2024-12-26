@@ -9,8 +9,8 @@ router.post("/register", upload.single("photo"), registerUser);
 router.post("/login",verifyJWT, loginUser);
 router.post("/logout", verifyJWT, logoutUser);
 router.get("/getcurrentuser", verifyJWT, getCurrentUser);
-router.route("/change-paassword", verifyJWT, changePassword);
-router.route("/update-details", verifyJWT, updatePersonalDetails);
-router.route("/update-photo", verifyJWT, updateUserPhoto);
+router.put("/change-paassword", verifyJWT, changePassword);
+router.put("/update-details", verifyJWT, updatePersonalDetails);
+router.put("/update-photo", verifyJWT, updateUserPhoto);
 
 export default router;
