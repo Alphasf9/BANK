@@ -11,6 +11,6 @@ router.post("/logout", verifyJWT, logoutUser);
 router.get("/getcurrentuser", verifyJWT, getCurrentUser);
 router.put("/change-paassword", verifyJWT, changePassword);
 router.put("/update-details", verifyJWT, updatePersonalDetails);
-router.put("/update-photo", verifyJWT, updateUserPhoto);
+router.post("/update-photo", verifyJWT, upload.single("photo"),updateUserPhoto);
 
 export default router;
