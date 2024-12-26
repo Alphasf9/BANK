@@ -227,7 +227,7 @@ const updatePersonalDetails = async (req, res) => {
     }
 
     try {
-      
+
         const user = await User.findByIdAndUpdate(
             req.user._id,
             {
@@ -238,10 +238,10 @@ const updatePersonalDetails = async (req, res) => {
                 occupation,
             },
             {
-                new: true, 
+                new: true,
                 runValidators: true,
             }
-        ).select("-password"); 
+        ).select("-password");
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -253,7 +253,7 @@ const updatePersonalDetails = async (req, res) => {
             message: "User has been updated",
         });
     } catch (error) {
-       
+
         console.error(error);
         return res.status(500).json({ error: error.message });
     }
@@ -261,7 +261,8 @@ const updatePersonalDetails = async (req, res) => {
 
 
 const updateUserPhoto = async (req, res) => {
-    const photoLocalPath = req.file?.path
+    const photoLocalPath = req.file?.path;
+   
     if (!photoLocalPath) {
         return res.status(401).json({ message: "Photo file required" })
     }
@@ -271,6 +272,8 @@ const updateUserPhoto = async (req, res) => {
     if (!photo.url) {
         return res.status(401).json({ message: "Error while uploading on cloudinary" });
     }
+
+
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
@@ -284,7 +287,7 @@ const updateUserPhoto = async (req, res) => {
         }
     ).select("-password");
 
-    return res.status(200).json({ message: "Photo Updated" });
+    return res.status(200).json({ user, message: "Photo Updated" });
 }
 
 export { registerUser, loginUser, logoutUser, getCurrentUser, changePassword, updatePersonalDetails, updateUserPhoto }
