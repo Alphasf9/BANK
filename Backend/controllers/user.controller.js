@@ -204,17 +204,26 @@ const getCurrentUser = async (req, res) => {
 }
 
 const changePassword = async (req, res) => {
-    const { oldPassword, newPassword } = req.body
-    const user = await User.findById(req.user?._id)
+    const { oldPassword, newPassword } = req.body;
+    console.log(req.body);
+    const user = await User.findById(req.user?._id).select("+userPassword");
+    console.log(user);
+    
 
     const isPasswordCorrect = await user.passwordCorrect(oldPassword);
+    console.log(isPasswordCorrect);
+    
 
     if (!isPasswordCorrect) {
         return res.status(401).json({ message: "Password not matched" })
     }
 
-    user.userPassword = newPassword;
+    const newhashedPassword = await bcrypt.hash(newPassword, 10);
+    
+
+    user.userPassword = newhashedPassword;
     await user.save({ validateBeforeSave: false });
+    
 
     return res.status(200).json({ message: "Password changed" });
 }

@@ -9,7 +9,7 @@ router.post("/register", upload.single("photo"), registerUser);
 router.post("/login",verifyJWT, loginUser);
 router.post("/logout", verifyJWT, logoutUser);
 router.get("/getcurrentuser", verifyJWT, getCurrentUser);
-router.put("/change-paassword", verifyJWT, changePassword);
+router.put("/change-password", verifyJWT, changePassword);
 router.put("/update-details", verifyJWT, updatePersonalDetails);
 router.post("/update-photo", verifyJWT, upload.single("photo"),updateUserPhoto);
 
