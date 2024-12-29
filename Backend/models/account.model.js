@@ -41,20 +41,20 @@ const accountSchema = new mongoose.Schema({
     },
 
     nominee: {
-        name: {
+        nomineeName: {
             type: String
         },
-        relation: {
+        nomineeRelation: {
             type: String
         },
-        contact: {
+        nomineeContact: {
             type: String
         }
     },
 
     accountPassword :{
         type:String,
-        required : true,
+        // required : true,
         select:false
     }
 }, { timestamps: true });
