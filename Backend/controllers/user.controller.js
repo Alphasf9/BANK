@@ -3,7 +3,6 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import bcrypt from "bcrypt";
 import { shouldResetLoginAttempts } from "../utils/helper.js";
-// import { globalOtp } from "../utils/mailVerification.js";
 import  sendMail  from "../utils/mailVerification.js";
 
 const genrateAccessTokenRefreshToken = async (userId) => {

@@ -17,9 +17,10 @@ const sendMail = async (req, res) => {
     
     const otp = Math.floor(Math.random() * 900000) + 100000; // 6-digit OTP
     const hashedOtp = await bcrypt.hash(otp.toString(), 10);
+    console.log(hashedOtp);
 
 
-    const otpExpiry = Date.now() + 4 * 60 * 1000;  // OTP expires in 5 minutes
+    const otpExpiry = Date.now() + 5 * 60 * 1000;  // OTP expires in 5 minutes
 
 
     req.session.otp = { code: hashedOtp, expiry: otpExpiry };
