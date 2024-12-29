@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import { isNumberObject } from "util/types";
 
 const userSchema = new mongoose.Schema({
 
@@ -97,13 +98,27 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         select: false
+    },
+
+    loginAttempts: {
+        type: Number,
+        default: 0
+    },
+
+    lastFailedLogin: {
+        type: Date
+    },
+
+    blocked: {
+        type: Boolean,
+        default: false
     }
 
 }, { timestamps: true });
 
 // userSchema.pre("save", async function (next) {
 //     if (!this.isModified("userPassword")) return next();
-    
+
 //     this.userPassword = await bcrypt.hash(this.userPassword, 10);
 //     next();
 // });

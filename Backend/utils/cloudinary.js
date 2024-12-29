@@ -17,14 +17,12 @@ const uploadOnCloudinary = async (localFilePath) => {
             resource_type: "auto" 
         });
 
-        console.log("File uploaded successfully:", file.url);
 
-        // Delete the local file after upload
-        // fs.unlink(localFilePath, (err) => {
-        //     if (err) {
-        //         console.error("Error deleting local file:", err);
-        //     }
-        // });
+        fs.unlink(localFilePath, (err) => {
+            if (err) {
+                console.error("Error deleting local file:", err);
+            }
+        });
 
         return file;
 
@@ -32,11 +30,11 @@ const uploadOnCloudinary = async (localFilePath) => {
         console.error("Error uploading to Cloudinary:", error);
 
         
-        // fs.unlink(localFilePath, (err) => {
-        //     if (err) {
-        //         console.error("Error deleting local file:", err);
-        //     }
-        // });
+        fs.unlink(localFilePath, (err) => {
+            if (err) {
+                console.error("Error deleting local file:", err);
+            }
+        });
 
         return null;
     }
