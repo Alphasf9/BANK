@@ -1,6 +1,7 @@
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import bcrypt from "bcrypt";
+import { shouldResetLoginAttempts } from "../utils/helper.js";
 
 const genrateAccessTokenRefreshToken = async (userId) => {
     const user = await User.findById(userId);
@@ -137,9 +138,16 @@ const loginUser = async (req, res, next) => {
             $or: [{ email }, { aadhar_id }]
         }).select("+userPassword");
 
+
+        if (user.blocked) {
+            return res.status(403).json({ message: "Your account has been previously blocked. Please contact customer support." });
+        }
+
+        
         if (!user) {
             return res.status(400).json({ message: "User not found" });
         }
+        await shouldResetLoginAttempts(user);
 
         const isPasswordMatch = await user.passwordCorrect(userPassword);
         if (!isPasswordMatch) {
@@ -167,6 +175,9 @@ const loginUser = async (req, res, next) => {
                 refreshToken,
                 message: "User Logged In Successfully"
             });
+
+
+
 
     } catch (error) {
         console.error("Error during logged in user:", error);
@@ -296,7 +307,7 @@ const updatePersonalDetails = async (req, res) => {
 
 const updateUserPhoto = async (req, res) => {
     const photoLocalPath = req.file?.path;
-   
+
     if (!photoLocalPath) {
         return res.status(401).json({ message: "Photo file required" })
     }
@@ -324,4 +335,50 @@ const updateUserPhoto = async (req, res) => {
     return res.status(200).json({ user, message: "Photo Updated" });
 }
 
-export { registerUser, loginUser, logoutUser, getCurrentUser, changePassword, updatePersonalDetails, updateUserPhoto }
+const blockUser = async (req, res) => {
+    try {
+        const { userPassword, email, aadhar_id } = req.body;
+
+        const user = await User.findOne({ $or: [{ email }, { aadhar_id }] }).select("+userPassword");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+
+        const checkForCorrectPassword = await user.passwordCorrect(userPassword);
+
+        if (checkForCorrectPassword) {
+            user.loginAttempts = 0;
+            await user.save();
+            return res.status(200).json({ message: "Password is correct. User is not blocked." });
+        }
+
+        user.loginAttempts += 1;
+        user.lastFailedLogin = new Date();
+
+        await user.save();
+
+        console.log("Login Attempts: ", user.loginAttempts);
+
+        if (user.loginAttempts >= 3) {
+            user.blocked = true;
+            await user.save();
+            return res.status(403).json({
+                message: "You have entered the wrong password 3 times. Your account has been blocked. Please contact customer support."
+            });
+        }
+
+        return res.status(400).json({ message: "Password is incorrect." });
+
+    } catch (error) {
+        console.error("Error during block user:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+
+
+
+
+export { registerUser, loginUser, logoutUser, getCurrentUser, changePassword, updatePersonalDetails, updateUserPhoto, blockUser }
