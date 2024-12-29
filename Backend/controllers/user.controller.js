@@ -35,6 +35,7 @@ const registerUser = async (req, res) => {
             nationality,
             userPassword,
             accountType, // New field for account creation
+            accountPassword, // New field for account creation
             branchName,  // New field for account creation
             branchCode,  // New field for account creation
             ifscCode,     // New field for account creation
@@ -44,7 +45,7 @@ const registerUser = async (req, res) => {
         } = req.body;
 
         
-        if (!firstName || !lastName || !email || !phoneNo || !userPassword || !accountType || !branchName || !branchCode || !ifscCode) {
+        if (!firstName || !lastName || !email || !phoneNo || !userPassword || !accountType || !branchName || !branchCode || !ifscCode || !accountPassword) {
             return res.status(400).json({ message: "All required fields must be provided." });
         }
 
@@ -83,11 +84,21 @@ const registerUser = async (req, res) => {
        
         const accountNumber = `ACC${Date.now()}`;
 
+        const hashedAccountPassword = await Account.hashAccPassword(accountPassword);
+
+        if (!hashedAccountPassword) {
+            return res.status(500).json({ message: "Error hashing account password." });
+        }
+
+        if(hashedPassword === hashedAccountPassword){
+            return res.status(400).json({ message: "User and account password should not be same."});
+        }
         
         const account = await Account.create({
             accountHolder: user._id,
             accountNumber,
             accountType,
+            accountPassword: hashedAccountPassword,
             branchDetails: { branchName, branchCode, ifscCode },
             balance: 0.0,
             nominee: { nomineeName, nomineeRelation, nomineeContact },
