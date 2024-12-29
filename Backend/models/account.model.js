@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt"; 
 
 const accountSchema = new mongoose.Schema({
     accountHolder: {
@@ -41,13 +42,13 @@ const accountSchema = new mongoose.Schema({
     },
 
     nominee: {
-        name: {
+        nomineeName: {
             type: String
         },
-        relation: {
+        nomineeRelation: {
             type: String
         },
-        contact: {
+        nomineeContact: {
             type: String
         }
     },
@@ -55,8 +56,16 @@ const accountSchema = new mongoose.Schema({
     accountPassword :{
         type:String,
         required : true,
-        select:false
     }
 }, { timestamps: true });
+
+accountSchema.statics.hashAccPassword = async function (accountPassword) {
+    return await bcrypt.hash(accountPassword, 10);
+}
+
+
+accountSchema.methods.hashPasswordCorrect = async function (accountPassword) {
+    return await bcrypt.compare(accountPassword, this.userPassword)// comparing password
+}
 
 export const Account = mongoose.model("Account", accountSchema);
