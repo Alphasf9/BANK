@@ -2,6 +2,8 @@ import { Account } from "../models/account.model.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import bcrypt from "bcrypt";
+import { shouldResetLoginAttempts } from "../utils/helper.js";
+import  sendMail  from "../utils/mailVerification.js";
 
 const genrateAccessTokenRefreshToken = async (userId) => {
     const user = await User.findById(userId);
@@ -44,7 +46,7 @@ const registerUser = async (req, res) => {
             nomineeContact     // New field for account creation
         } = req.body;
 
-        
+
         if (!firstName || !lastName || !email || !phoneNo || !userPassword || !accountType || !branchName || !branchCode || !ifscCode || !accountPassword) {
             return res.status(400).json({ message: "All required fields must be provided." });
         }
@@ -55,17 +57,17 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "User already exists." });
         }
 
-        
+
         const hashedPassword = await bcrypt.hash(userPassword, 10);
 
-        
+
         const photoLocalPath = req.file?.path;
         if (!photoLocalPath) {
             return res.status(400).json({ message: "Photo file is required." });
         }
         const photo = await uploadOnCloudinary(photoLocalPath);
 
-        
+
         const user = await User.create({
             fullName: { firstName, lastName },
             email,
@@ -81,7 +83,7 @@ const registerUser = async (req, res) => {
             userPassword: hashedPassword,
         });
 
-       
+
         const accountNumber = `ACC${Date.now()}`;
 
         const hashedAccountPassword = await Account.hashAccPassword(accountPassword);
@@ -90,10 +92,10 @@ const registerUser = async (req, res) => {
             return res.status(500).json({ message: "Error hashing account password." });
         }
 
-        if(hashedPassword === hashedAccountPassword){
-            return res.status(400).json({ message: "User and account password should not be same."});
+        if (hashedPassword === hashedAccountPassword) {
+            return res.status(400).json({ message: "User and account password should not be same." });
         }
-        
+
         const account = await Account.create({
             accountHolder: user._id,
             accountNumber,
@@ -143,27 +145,35 @@ const loginUser = async (req, res) => {
     try {
         const { email, aadhar_id, userPassword } = req.body;
 
-        
+
         if (!email || !aadhar_id || !userPassword) {
             return res.status(400).json({ message: "All fields are required." });
         }
 
-    
-        const user = await User.findOne({ $or: [{ email }, { aadhar_id }] }).select("+userPassword");
+        const user = await User.findOne({
+            $or: [{ email }, { aadhar_id }]
+        }).select("+userPassword");
+
+
+        if (user.blocked) {
+            return res.status(403).json({ message: "Your account has been previously blocked. Please contact customer support." });
+        }
+
+
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
+        await shouldResetLoginAttempts(user);
 
-        
-        const isPasswordMatch = await bcrypt.compare(userPassword, user.userPassword);
+        const isPasswordMatch = await user.passwordCorrect(userPassword);
         if (!isPasswordMatch) {
             return res.status(401).json({ message: "Invalid credentials." });
         }
 
-       
+
         const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(user._id);
 
-        
+
         user.refreshToken = refreshToken;
         await user.save({ validateBeforeSave: false });
 
@@ -193,6 +203,10 @@ const loginUser = async (req, res) => {
                 accessToken,
                 refreshToken,
             });
+
+
+
+
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).json({ message: "Internal server error." });
@@ -377,6 +391,7 @@ const updateAccountDetails = async (req, res) => {
 const updateUserPhoto = async (req, res) => {
     const photoLocalPath = req.file?.path;
 
+
     if (!photoLocalPath) {
         return res.status(401).json({ message: "Photo file required" })
     }
@@ -404,4 +419,103 @@ const updateUserPhoto = async (req, res) => {
     return res.status(200).json({ user, message: "Photo Updated" });
 }
 
-export { registerUser, loginUser, logoutUser, getCurrentUser, changePassword, updatePersonalDetails, updateUserPhoto, updateAccountDetails }
+const blockUser = async (req, res) => {
+    try {
+        const { userPassword, email, aadhar_id } = req.body;
+
+        const user = await User.findOne({ $or: [{ email }, { aadhar_id }] }).select("+userPassword");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+
+        const checkForCorrectPassword = await user.passwordCorrect(userPassword);
+
+        if (checkForCorrectPassword) {
+            user.loginAttempts = 0;
+            await user.save();
+            return res.status(200).json({ message: "Password is correct. User is not blocked." });
+        }
+
+        user.loginAttempts += 1;
+        user.lastFailedLogin = new Date();
+
+        await user.save();
+
+        console.log("Login Attempts: ", user.loginAttempts);
+
+        if (user.loginAttempts >= 3) {
+            user.blocked = true;
+            await user.save();
+            return res.status(403).json({
+                message: "You have entered the wrong password 3 times. Your account has been blocked. Please contact customer support."
+            });
+        }
+
+        return res.status(400).json({ message: "Password is incorrect." });
+
+    } catch (error) {
+        console.error("Error during block user:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+const sendOtp = async (req, res) => {
+    try {
+        await sendMail(req, res);
+        res.status(200).json({ message: "OTP sent successfully,check your email for OTP" });
+    } catch (error) {
+        console.error("Error during sending OTP:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+
+
+const checkOtpForVerification = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        const sessionOtp = req.session.otp;
+        if (!sessionOtp) {
+            return res.status(401).json({ message: "OTP session has expired or does not exist" });
+        }
+
+
+        if (!otp) {
+            return res.status(400).json({ message: "OTP is required" });
+        }
+
+        const { code: hashedOtp, expiry } = req.session.otp;
+
+
+        if (Date.now() > expiry) {
+            return res.status(401).json({ message: "OTP expired" });
+        }
+
+
+        const isMatch = await bcrypt.compare(otp.toString(), hashedOtp);
+
+        if (isMatch) {
+            req.session.otp = null;
+            return res.status(200).json({ message: "OTP is correct" });
+        }
+        else {
+
+            return res.status(400).json({ message: "OTP is incorrect" });
+        }
+
+    } catch (error) {
+        console.error("Error during OTP verification:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+
+
+export {
+    registerUser, loginUser, logoutUser,
+    getCurrentUser, changePassword, updatePersonalDetails,
+    updateUserPhoto, blockUser, sendOtp,
+    checkOtpForVerification
+}
