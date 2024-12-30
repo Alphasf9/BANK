@@ -171,9 +171,8 @@ const loginUser = async (req, res) => {
 
 
         const options = { httpOnly: true, secure: true };
+        res.cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options);
         return res.status(200)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
             .json({
                 message: "User logged in successfully.",
                 user: {
@@ -220,8 +219,8 @@ const logoutUser = async (req, res) => {
         secure: true
     }
 
-    return res.status(200).clearCookie("accessToken", accessToken, option).clearCookie("refreshToken", refreshToken, option)
-        .json({ user: {}, message: "User LoggedOut Successfully" })
+    res.clearCookie("accessToken", accessToken, option).clearCookie("refreshToken", refreshToken, option);
+    return res.status(200).json({ user: {}, message: "User LoggedOut Successfully" })
 
 }
 
