@@ -4,7 +4,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
     blockUser, changePassword, checkOtpForVerification, getCurrentUser,
     loginUser, logoutUser, registerUser,
-    sendOtp, updatePersonalDetails, updateUserPhoto
+    sendOtp, updateAccountDetails, updatePersonalDetails, updateUserPhoto
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -15,6 +15,7 @@ router.post("/logout", verifyJWT, logoutUser);
 router.get("/getcurrentuser", verifyJWT, getCurrentUser);
 router.put("/change-password", verifyJWT, changePassword);
 router.put("/update-details", verifyJWT, updatePersonalDetails);
+router.post("/update-account", verifyJWT, updateAccountDetails);
 router.post("/update-photo", verifyJWT, upload.single("photo"), updateUserPhoto);
 
 router.post("/block-user", blockUser);
