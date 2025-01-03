@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.route.js";
 import session from "express-session";
 import Mongostore from "connect-mongo";
+import transactionRouter from "./routes/transaction.route.js";
+import cardRouter from "./routes/card.route.js";
 
 const app = express();
 dotenv.config();
@@ -37,6 +39,8 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/user/transaction", transactionRouter);
+app.use("/api/v1/user/card", cardRouter);
 
 // Server listening
 app.listen(port, () => {

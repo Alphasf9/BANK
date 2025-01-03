@@ -517,5 +517,5 @@ export {
     registerUser, loginUser, logoutUser,
     getCurrentUser, changePassword, updatePersonalDetails,
     updateUserPhoto, blockUser, sendOtp,
-    checkOtpForVerification
+    checkOtpForVerification, updateAccountDetails
 }
