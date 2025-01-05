@@ -18,7 +18,7 @@ const issueCard = async (req, res) => {
 
         const cardNumber = Math.floor(10 ** 15 + Math.random() * 9 * 10 ** 15).toString(); // 16-digit card number
         const cvv = String(Math.floor(100 + Math.random() * 900)); // 3-digit CVV
-        const pin = String(Math.floor(1000 + Math.random() * 9000)); // 4-digit PIN
+        // const pin = String(Math.floor(1000 + Math.random() * 9000)); // 4-digit PIN
 
         const expiryDate = new Date();
         expiryDate.setFullYear(expiryDate.getFullYear() + 5);
@@ -30,7 +30,6 @@ const issueCard = async (req, res) => {
             cardType,
             expiryDate,
             cvv,
-            pin,
             cardStatus: "Active",
         });
         await card.save();
