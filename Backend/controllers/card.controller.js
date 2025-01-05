@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Account } from "../models/account.model.js";
 import { Card } from "../models/card.model.js";
 import sendMail from "../utils/mailVerification.js";
@@ -128,3 +129,84 @@ const generateCardPin = async (req, res) => {
 };
 
 export { issueCard, generateCardPin };
+=======
+    import { Account } from "../models/account.model.js";
+    import { Card } from "../models/card.model.js";
+
+
+    const issueCard = async (req, res) => {
+        const { accountNumber, cardHolderName, cardType } = req.body;
+
+        if (!accountNumber || !cardHolderName || !cardType) {
+            return res.status(400).json({ message: "Please provide all the details" });
+        }
+
+        if(cardType !== "Virtual Card" && cardType !== "Debit Card"&& cardType !== "Credit Card") {
+            return res.status(400).json({ message: "Invalid card type" });
+        }
+
+
+        try {
+
+            const account = await Account.findOne({ accountNumber });
+            if (!account) {
+                return res.status(404).json({ message: "Account not found" });
+            }
+            
+
+            const cardCheck = account.isCard;
+           
+           let cardAlreadyIssued =false;
+
+            cardCheck.forEach((card) => {
+                if(card === cardType) {
+                    cardAlreadyIssued = true;
+                }
+            })
+            
+            if(cardAlreadyIssued) {
+                return res.status(400).json({ message: "Card already issued" });
+            }
+            
+            
+            const cardNumber = Math.floor(10 ** 15 + Math.random() * 9 * 10 ** 15).toString(); // 16-digit card number
+            const cvv = String(Math.floor(100 + Math.random() * 900)); // 3-digit CVV
+            const pin = String(Math.floor(1000 + Math.random() * 9000)); // 4-digit PIN
+
+            const expiryDate = new Date();
+            expiryDate.setFullYear(expiryDate.getFullYear() + 5);
+
+            account.isCard.push(cardType);
+            await account.save();
+
+            const card = new Card({
+                accountNumber,
+                cardNumber,
+                cardHolderName,
+                cardType,
+                expiryDate,
+                cvv,
+                pin,
+                cardStatus: "Active",
+            });
+            await card.save();
+
+
+            return res.status(201).json({
+                card: {
+                    cardNumber,
+                    cardType,
+                    cardHolderName,
+                    expiryDate,
+                    cardStatus: card.cardStatus,
+                }, message: "Card issued successfully"
+            });
+
+        } catch (error) {
+            console.error("Error issuing card:", error);
+            return res.status(500).json({ message: "Failed to issue card", error: error.message });
+        }
+    }
+
+    export { issueCard };
+>>>>>>> 18f2ea88fee6744e53dc840208d891274e5e9242
