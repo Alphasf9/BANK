@@ -563,6 +563,6 @@ const checkOtpForVerification = async (req, res) => {
 export {
     registerUser, loginUser, logoutUser,
     getCurrentUser, changePassword, updatePersonalDetails,
-    updateUserPhoto, blockUser, 
+    updateUserPhoto, blockUser,
     checkOtpForVerification, updateAccountDetails
 }
