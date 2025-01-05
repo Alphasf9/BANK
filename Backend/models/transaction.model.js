@@ -15,6 +15,10 @@ const transactionSchema = new mongoose.Schema({
         type: String,
     },
 
+    accountNumber: {
+        type: String
+    },
+
     type: {
         type: String,
         enum: ["Credit", "Debit", "Transfer"],
