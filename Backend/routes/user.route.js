@@ -4,7 +4,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
     blockUser, changePassword, checkOtpForVerification, getCurrentUser,
     loginUser, logoutUser, registerUser,
-    sendOtp, updateAccountDetails, updatePersonalDetails, updateUserPhoto
+     updateAccountDetails, updatePersonalDetails, updateUserPhoto
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -20,8 +20,8 @@ router.post("/update-photo", verifyJWT, upload.single("photo"), updateUserPhoto)
 
 router.post("/block-user", blockUser);
 
-router.get('/getOtp', sendOtp)
+// router.get('/getOtp', sendOtp)
 
-router.post('/verifyOtp', checkOtpForVerification)
+router.post('/verifyOtp', upload.single("photo"), checkOtpForVerification)
 
 export default router;
