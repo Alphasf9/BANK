@@ -56,7 +56,12 @@ const accountSchema = new mongoose.Schema({
     accountPassword :{
         type:String,
         required : true,
-    }
+    },
+
+    isCard:{
+        type:[String],
+        default : []
+    },
 }, { timestamps: true });
 
 accountSchema.statics.hashAccPassword = async function (accountPassword) {
