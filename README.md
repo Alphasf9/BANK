@@ -69,7 +69,7 @@ To get the backend of the application up and running locally, follow these steps
 
 
 
-Install Backend Dependencies:
+**Install Backend Dependencies**:
 
 Navigate to the backend directory and install the required dependencies
 
@@ -77,7 +77,7 @@ cd backend
 npm install
 
 
-Environment Configuration:
+**Environment Configuration**:
 
 Create a .env file in the backend directory and add the following environment variables:
 
@@ -85,7 +85,7 @@ MONGODB_URI: MongoDB connection string (can use MongoDB Atlas or a local MongoDB
 JWT_SECRET: A secret key for signing JWT tokens.
 Running the Backend:
 
-Start the backend server:
+**Start the backend server**:
 
 bash
 Copy code
@@ -93,36 +93,38 @@ npm start
 The backend server should now be running on http://localhost:8000.
 
 
-Contributing
+**Contributing**:-
 We welcome contributions to improve this project! To contribute, follow these steps:
 
 Fork the repository by clicking the Fork button at the top-right corner of this page.
+
 Clone your fork to your local machine:
-bash
-Copy code
-git clone https://github.com/your-username/BANK.git
+
+**git clone https://github.com/Alphasf9/BANK.git**
 Create a new branch for your feature or bugfix:
 bash
 Copy code
 git checkout -b feature-branch
 Make your changes.
 Commit your changes:
-bash
-Copy code
+
 git commit -m 'Add new feature or fix bug'
 Push your changes to your forked repository:
 bash
 Copy code
+
 git push origin feature-branch
+
 Open a pull request on GitHub, and describe the changes you have made.
-Contributors:
-MOHD HASEEB AI(Alphasf9) - Full stack developer (https://github.com/Alphasf9)
-Aryan Kumar (Aryan-Kumar-7) - Full stack developer (https://github.com/Aryan-Kumar-7)
-Shubham Maurya (shubhammauryask ) - App developer (https://github.com/shubhammauryask)
-Krishnakant Yadav (Kk-0010) - Ful stack developer (https://github.com/Kk-0010)
+
+**Contributors**:
+**MOHD HASEEB AI(Alphasf9)** - Full stack developer (https://github.com/Alphasf9)
+**Aryan Kumar (Aryan-Kumar-7)** - Full stack developer (https://github.com/Aryan-Kumar-7)
+**Shubham Maurya (shubhammauryask)** - App developer (https://github.com/shubhammauryask)
+**Krishnakant Yadav (Kk-0010)** - Ful stack developer (https://github.com/Kk-0010)
  - Contributor (Backend)
-Contributor 3 - Contributor (Backend)
-License
+Contributor 4 - Contributor (Backend)
+**License**
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 markdown
