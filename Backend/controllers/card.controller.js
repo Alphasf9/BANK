@@ -1,5 +1,6 @@
 import { Account } from "../models/account.model.js";
 import { Card } from "../models/card.model.js";
+import { User } from "../models/user.model.js";
 import sendMail from "../utils/mailVerification.js";
 import bcrypt from "bcrypt";
 
@@ -127,4 +128,165 @@ const generateCardPin = async (req, res) => {
     }
 };
 
-export { issueCard, generateCardPin };
+const changeCardPin = async (req, res) => {
+    const { email, accountNumber, cardType, oldPin, newPin } = req.body;
+
+    if (!email || !accountNumber || !oldPin || !newPin || !cardType) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!["Debit Card", "Credit Card", "Virtual Card"].includes(cardType)) {
+        return res.status(400).json({ message: "Invalid card type" });
+    }
+
+    if (newPin === oldPin) {
+        return res.status(400).json({ message: "New PIN must be different from the old PIN" });
+    }
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const account = await Account.findOne({ accountNumber });
+        if (!account) {
+            return res.status(404).json({ message: "Account not found" });
+        }
+
+        const card = await Card.findOne({ accountNumber, cardType }).select("+pin");
+        if (!card) {
+            return res.status(404).json({ message: `No ${cardType} associated with this account` });
+        }
+        // console.log(card);
+        
+
+        const isPinMatch = await card.passwordCorrect(oldPin);
+        if (!isPinMatch) {
+            return res.status(400).json({ message: "Old PIN is incorrect" });
+        }
+
+        const newHashedPin = await Card.hashPassword(newPin);
+
+        // Store hashed PIN and user details in the session
+        req.session.cardDetails = {
+            accountNumber,
+            cardType,
+            newHashedPin,
+        };
+        req.session.userDetails = { email };
+
+        // Send OTP for PIN change
+        await sendMail(req);
+
+        return res.status(200).json({ message: "OTP sent for PIN change" });
+    } catch (error) {
+        console.error("Error during PIN change:", error);
+        return res.status(500).json({ message: "Failed to initiate PIN change", error: error.message });
+    }
+};
+
+
+const otpVerifyForPinChange = async (req, res) => {
+    const { otp } = req.body;
+
+    if (!otp) {
+        return res.status(400).json({ message: "OTP is required" });
+    }
+
+    try {
+        const sessionOtp = req.session.otp;
+        if (!sessionOtp) {
+            return res.status(401).json({ message: "OTP session expired or does not exist" });
+        }
+
+        const { code: hashedOtp, expiry } = sessionOtp;
+
+        if (Date.now() > expiry) {
+            return res.status(400).json({ message: "OTP expired" });
+        }
+
+        const isMatch = await bcrypt.compare(otp.toString(), hashedOtp);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+
+        // Retrieve card details from session
+        const { accountNumber, cardType, newHashedPin } = req.session.cardDetails || {};
+        if (!accountNumber || !cardType || !newHashedPin) {
+            return res.status(400).json({ message: "Session data is missing or corrupted" });
+        }
+
+        const card = await Card.findOne({ accountNumber, cardType });
+        if (!card) {
+            return res.status(404).json({ message: `No ${cardType} associated with this account` });
+        }
+        // console.log(card);
+        
+
+        // Update card PIN
+        card.pin = newHashedPin;
+        await card.save();
+
+        // Clear session data
+        req.session.cardDetails = null;
+        req.session.otp = null;
+
+        return res.status(200).json({ message: "Card PIN changed successfully" });
+    } catch (error) {
+        console.error("Error during OTP verification:", error);
+        return res.status(500).json({ message: "Failed to verify OTP", error: error.message });
+    }
+};
+
+const blockCard = async (req, res) => {
+    const { email, accountNumber, cardType, reason } = req.body;
+
+    if (!email || !accountNumber || !cardType) {
+        return res.status(400).json({ message: "Email, accountNumber, and cardType are required." });
+    }
+
+    if (!["Debit Card", "Credit Card", "Virtual Card"].includes(cardType)) {
+        return res.status(400).json({ message: "Invalid card type." });
+    }
+
+    try {
+        const account = await Account.findOne({ accountNumber, email });
+        if (!account) {
+            return res.status(404).json({ message: "Account not found or email mismatch." });
+        }
+
+        const card = await Card.findOne({ accountNumber, cardType });
+        if (!card) {
+            return res.status(404).json({ message: `No ${cardType} found for the account.` });
+        }
+
+        if (card.cardStatus === "Blocked") {
+            return res.status(400).json({ message: "Card is already blocked." });
+        }
+
+        card.cardStatus = "Blocked";
+        card.blockReason = reason || "User request"; // Optional reason
+        await card.save();
+
+        // Remove the card type from the account's isCard array
+        account.isCard = account.isCard.filter((type) => type !== cardType);
+        await account.save();
+
+        return res.status(200).json({ 
+            message: `${cardType} has been blocked successfully.`,
+            card: {
+                cardType: card.cardType,
+                cardNumber: card.cardNumber,
+                blockReason: card.blockReason,
+                cardStatus: card.cardStatus,
+            },
+        });
+    } catch (error) {
+        console.error("Error blocking card:", error);
+        return res.status(500).json({ message: "Failed to block the card.", error: error.message });
+    }
+};
+
+
+export { issueCard, generateCardPin, changeCardPin, otpVerifyForPinChange, blockCard };
