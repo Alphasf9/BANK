@@ -6,17 +6,18 @@ import {
     loginUser, logoutUser, registerUser,
      updateAccountDetails, updatePersonalDetails, updateUserPhoto
 } from "../controllers/user.controller.js";
+import { limiter } from "../middlewares/rateLimit.js";
 
 const router = Router();
 
-router.post("/register", upload.single("photo"), registerUser);
-router.post("/login", loginUser);
-router.post("/logout", verifyJWT, logoutUser);
-router.get("/getcurrentuser", verifyJWT, getCurrentUser);
-router.put("/change-password", verifyJWT, changePassword);
-router.put("/update-details", verifyJWT, updatePersonalDetails);
-router.post("/update-account", verifyJWT, updateAccountDetails);
-router.post("/update-photo", verifyJWT, upload.single("photo"), updateUserPhoto);
+router.post("/register",limiter, upload.single("photo"), registerUser);
+router.post("/login",limiter, loginUser);
+router.post("/logout",limiter, verifyJWT, logoutUser);
+router.get("/getcurrentuser",limiter, verifyJWT, getCurrentUser);
+router.put("/change-password",limiter, verifyJWT, changePassword);
+router.put("/update-details",limiter, verifyJWT, updatePersonalDetails);
+router.post("/update-account",limiter, verifyJWT, updateAccountDetails);
+router.post("/update-photo",limiter, verifyJWT, upload.single("photo"), updateUserPhoto);
 
 router.post("/block-user", blockUser);
 
