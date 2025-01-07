@@ -14,15 +14,14 @@ const sendMail = async (req) => {
 
     const otp = Math.floor(Math.random() * 900000) + 100000; // 6-digit OTP
     const hashedOtp = await bcrypt.hash(otp.toString(), 10);
-    console.log("Hashed OTP:", hashedOtp);
+    // console.log("Hashed OTP:", hashedOtp);
 
-    const otpExpiry = Date.now() + 5 * 60 * 1000; // OTP expires in 5 minutes
+    const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
     req.session.otp = { code: hashedOtp, expiry: otpExpiry };
+    // console.log("This is the value if req.session.otp:", otp);
 
     const recipients = [
-        "mh6912641@gmail.com",
-        "rajaryankumar26april@gmail.com",
-        "krishnakantyadav853@gmail.com",
+        "mh6912641@gmail.com"
     ];
 
     const results = [];

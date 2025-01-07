@@ -25,7 +25,7 @@ app.use(
       collectionName: "sessions",
       ttl: 14 * 24 * 60 * 60, 
     }),
-    cookie: { secure: true }, 
+    cookie: { secure: false, httpOnly: true },
   })
 );
 

@@ -22,6 +22,6 @@ router.post("/block-user", blockUser);
 
 router.get('/getOtp', sendOtp)
 
-router.post('/verifyOtp', checkOtpForVerification)
+router.post('/verifyOtp', upload.single("photo"),checkOtpForVerification)
 
 export default router;
