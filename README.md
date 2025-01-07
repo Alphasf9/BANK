@@ -121,7 +121,7 @@ Open a pull request on GitHub, and describe the changes you have made.
 **MOHD HASEEB AI(Alphasf9)** - Full stack developer (https://github.com/Alphasf9)
 **Aryan Kumar (Aryan-Kumar-7)** - Full stack developer (https://github.com/Aryan-Kumar-7)
 **Shubham Maurya (shubhammauryask)** - App developer (https://github.com/shubhammauryask)
-**Krishnakant Yadav (Kk-0010)** - Ful stack developer (https://github.com/Kk-0010)
+**Krishnakant Yadav (Kk-0010)** - Full stack developer (https://github.com/Kk-0010)
  - Contributor (Backend)
 Contributor 4 - Contributor (Backend)
 **License**
