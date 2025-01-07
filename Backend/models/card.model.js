@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt"
 
 const cardSchema = new mongoose.Schema({
   accountNumber: {
     type: String,
     required: true
+  },
+
+  email: {
+    type: String
   },
   
   cardNumber: {
@@ -35,7 +40,8 @@ const cardSchema = new mongoose.Schema({
 
   pin: {
     type: String,
-    required: true,
+    req: true,
+    select: false
   },
 
   cardStatus: {
@@ -52,5 +58,14 @@ const cardSchema = new mongoose.Schema({
   // },
 
 }, { timestamps: true });
+
+cardSchema.statics.hashPassword = async function (pin) {
+    return await bcrypt.hash(pin, 10);
+}
+
+
+cardSchema.methods.passwordCorrect = async function (pin) {
+    return await bcrypt.compare(pin, this.pin)// comparing password
+}
 
 export const Card = mongoose.model("Card", cardSchema);

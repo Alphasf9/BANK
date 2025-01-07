@@ -199,13 +199,15 @@ const cardTransaction = async (req, res) => {
         
         session.startTransaction();
 
-        const card = await Card.findOne({ cardNumber }).session(session);
+        const card = await Card.findOne({ cardNumber }).select("+pin").session(session);
+        
         if(!card) {
             return res.status(404).json({ message: "Card not found" });
         }
 
-        if(card.pin !== pin) {
-            return res.status(400).json({ message: "Invalid PIN" });
+        const isPinCorrect = await card.passwordCorrect(pin);
+        if (!isPinCorrect) {
+            return res.status(401).json({ message: "Invalid Pin." });
         }
 
         if(card.cardStatus !== "Active") {
@@ -217,6 +219,7 @@ const cardTransaction = async (req, res) => {
         }
 
         const account = await Account.findOne({ accountNumber: card.accountNumber }).session(session);
+        
         if(!account) {
             return res.status(404).json({ message: "Account not found" });
         }
@@ -234,6 +237,7 @@ const cardTransaction = async (req, res) => {
         }
 
         await account.save({ session });
+        
 
         const transaction = new Transaction({
             transactionId: `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -254,7 +258,7 @@ const cardTransaction = async (req, res) => {
         const transaction = new Transaction({
             transactionId: `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             accountNumber: card.accountNumber,
-            type: "Transfer",
+            type,
             amount,
             description,
             status: "Failed",
