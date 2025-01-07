@@ -142,9 +142,12 @@ We welcome contributions to improve this project! To contribute, follow these st
 
 ### Contributors:
 
-**MOHD HASEEB AI (Alphasf9)** - Full stack developer [https://github.com/Alphasf9]
-**Aryan Kumar (Aryan-Kumar-7)** - Full stack developer [https://github.com/Aryan-Kumar-7]
-**Shubham Maurya (shubhammauryask)** - App developer/Backend Developer [https://github.com/shubhammauryask]
+**MOHD HASEEB AI (Alphasf9)** - Full stack developer [https://github.com/Alphasf9
+
+**Aryan Kumar (Aryan-Kumar-7)** - Full stack developer [https://github.com/Aryan-Kumar-7].
+
+**Shubham Maurya (shubhammauryask)** - App developer/Backend Developer [https://github.com/shubhammauryask].
+
 **Krishnakant Yadav (Kk-0010)** - Full stack developer [https://github.com/Kk-0010]
 
 ### License
