@@ -251,7 +251,7 @@ const blockCard = async (req, res) => {
     }
 
     try {
-        const account = await Account.findOne({ accountNumber, email });
+        const account = await Account.findOne({ accountNumber });
         if (!account) {
             return res.status(404).json({ message: "Account not found or email mismatch." });
         }
