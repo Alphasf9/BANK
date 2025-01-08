@@ -51,12 +51,12 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "All required fields must be provided." });
         }
         const photoLocalPath = req.file?.path;
-        // console.log("Photo local path:", photoLocalPath);
+        console.log("Photo local path:", photoLocalPath);
         if (!photoLocalPath) {
             return res.status(400).json({ message: "Photo file is required." });
         }
         const photo = await uploadOnCloudinary(photoLocalPath);
-        // console.log("Photo URL:", photo.url);
+        console.log("Photo URL:", photo.url);
         const hashedPassword = await bcrypt.hash(userPassword, 10);
         const hashedAccountPassword = await Account.hashAccPassword(accountPassword);
 
@@ -425,15 +425,15 @@ const blockUser = async (req, res) => {
 };
 
 
-// const sendOtp = async (req, res) => {
-//     try {
-//         await sendMail(req, res);
-//         res.status(200).json({ message: "OTP sent successfully,check your email for OTP" });
-//     } catch (error) {
-//         console.error("Error during sending OTP:", error);
-//         res.status(500).json({ message: "Internal server error" });
-//     }
-// }
+const sendOtp = async (req, res) => {
+    try {
+        await sendMail(req, res);
+        res.status(200).json({ message: "OTP sent successfully,check your email for OTP" });
+    } catch (error) {
+        console.error("Error during sending OTP:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
 
 
 
@@ -563,6 +563,6 @@ const checkOtpForVerification = async (req, res) => {
 export {
     registerUser, loginUser, logoutUser,
     getCurrentUser, changePassword, updatePersonalDetails,
-    updateUserPhoto, blockUser,
+    updateUserPhoto, blockUser, sendOtp,
     checkOtpForVerification, updateAccountDetails
 }

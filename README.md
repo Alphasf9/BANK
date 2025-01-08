@@ -38,24 +38,24 @@ The frontend will be developed later to interact with the backend APIs. It will 
 
 The backend of the application is built using the following technologies:
 
-- **Backend**:
-  - **Node.js**: JavaScript runtime for building scalable server-side applications.
-  - **Express.js**: Web application framework for Node.js, simplifying API development.
-  - **MongoDB**: NoSQL database for storing user and transaction data.
-  - **Mongoose**: ODM (Object Data Modeling) library for MongoDB and Node.js.
-  - **JWT (JSON Web Tokens)**: Secure token-based authentication system.
-  - **bcryptjs**: Password hashing library to ensure secure password storage.
-  - **dotenv**: To manage environment variables for sensitive information.
-  - **Cors**: Middleware for enabling cross-origin requests between the client and server.
-  - **cloudinary**: For managing and storing images, if applicable.
-  - **connect-mongo**: For session storage using MongoDB.
-  - **cookie-parser**: To parse cookies for session management.
-  - **express-session**: For handling user sessions.
-  - **multer**: Middleware for handling file uploads, if needed.
-  - **nodemailer**: For sending email notifications (e.g., for account registration or transactions).
-  
-- **Development**:
-  - **nodemon**: For auto-reloading the server during development.
+### Backend:
+- **Node.js**: JavaScript runtime for building scalable server-side applications.
+- **Express.js**: Web application framework for Node.js, simplifying API development.
+- **MongoDB**: NoSQL database for storing user and transaction data.
+- **Mongoose**: ODM (Object Data Modeling) library for MongoDB and Node.js.
+- **JWT (JSON Web Tokens)**: Secure token-based authentication system.
+- **bcryptjs**: Password hashing library to ensure secure password storage.
+- **dotenv**: To manage environment variables for sensitive information.
+- **Cors**: Middleware for enabling cross-origin requests between the client and server.
+- **cloudinary**: For managing and storing images, if applicable.
+- **connect-mongo**: For session storage using MongoDB.
+- **cookie-parser**: To parse cookies for session management.
+- **express-session**: For handling user sessions.
+- **multer**: Middleware for handling file uploads, if needed.
+- **nodemailer**: For sending email notifications (e.g., for account registration or transactions).
+
+### Development:
+- **nodemon**: For auto-reloading the server during development.
 
 ## Installation Instructions
 
@@ -68,69 +68,93 @@ To get the backend of the application up and running locally, follow these steps
    git clone https://github.com/Alphasf9/BANK.git
 
 
+### Install Backend Dependencies:
 
-**Install Backend Dependencies**:
-
-Navigate to the backend directory and install the required dependencies
+Navigate to the backend directory and install the required dependencies:
 
 cd backend
 npm install
 
 
-**Environment Configuration**:
+### Environment Configuration:
 
 Create a .env file in the backend directory and add the following environment variables:
 
-MONGODB_URI: MongoDB connection string (can use MongoDB Atlas or a local MongoDB instance).
-JWT_SECRET: A secret key for signing JWT tokens.
-Running the Backend:
+PORT: Port where the server will run (default: 8000).
 
-**Start the backend server**:
+MONGO_URI: MongoDB connection string.
 
-bash
-Copy code
-npm start
-The backend server should now be running on http://localhost:8000.
+ACCESS_TOKEN_SECRET: Secret for access token generation.
+
+ACCESS_TOKEN_EXPIRY: Expiry time for the access token (default: 1d).
+
+REFRESH_TOKEN_SECRET: Secret for refresh token generation.
+
+REFRESH_TOKEN_EXPIRY: Expiry time for the refresh token (default: 10d).
+
+CLOUDINARY_CLOUD_NAME: Cloud name for Cloudinary image storage.
+
+CLOUDINARY_API_KEY: API key for Cloudinary.
+
+CLOUDINARY_API_SECRET: API secret for Cloudinary
+
+SESSION_SECRET_KEY: Secret key for session management
+
+NODEMAILER_GMAIL_USERNAME: Gmail username for Nodemailer.
+
+NODEMAILER_GMAIL_PASSWORD: Gmail password for Nodemailer.
 
 
-**Contributing**:-
+
+
+### Running the Backend
+Once you have installed the dependencies and set up the configuration, you can run the backend by following these steps:
+
+1. Navigate to the backend directory.
+2.Run the server with:
+**npm start**
+OR
+**npx nodemon**
+3.The backend API will be accessible at http://localhost:8000.
+
+
+
+### Contribution:
+
 We welcome contributions to improve this project! To contribute, follow these steps:
 
-Fork the repository by clicking the Fork button at the top-right corner of this page.
+1.Fork the repository by clicking the Fork button at the top-right corner of this page.
 
-Clone your fork to your local machine:
+2.Clone your fork to your local machine: **git clone https://github.com/your-username/BANK.git
 
-**git clone https://github.com/Alphasf9/BANK.git**
-Create a new branch for your feature or bugfix:
-bash
-Copy code
-git checkout -b feature-branch
-Make your changes.
-Commit your changes:
+3.Create a new branch for your feature or bugfix: **git checkout -b feature-branch**
 
-git commit -m 'Add new feature or fix bug'
-Push your changes to your forked repository:
-bash
-Copy code
+4.Make your changes.
 
-git push origin feature-branch
+5.Commit your changes: **git commit -m 'Add new feature or fix bug'**
 
-Open a pull request on GitHub, and describe the changes you have made.
+6.Push your changes to your forked repository: **git push origin feature-branch**
 
-**Contributors**:
-**MOHD HASEEB AI(Alphasf9)** - Full stack developer (https://github.com/Alphasf9)
-**Aryan Kumar (Aryan-Kumar-7)** - Full stack developer (https://github.com/Aryan-Kumar-7)
-**Shubham Maurya (shubhammauryask)** - App developer (https://github.com/shubhammauryask)
-**Krishnakant Yadav (Kk-0010)** - Full stack developer (https://github.com/Kk-0010)
- - Contributor (Backend)
-Contributor 4 - Contributor (Backend)
-**License**
+7.Open a pull request on GitHub, and describe the changes you have made.
+
+
+
+
+### Contributors:
+
+**MOHD HASEEB AI (Alphasf9)** - Full stack developer [https://github.com/Alphasf9
+
+**Aryan Kumar (Aryan-Kumar-7)** - Full stack developer [https://github.com/Aryan-Kumar-7].
+
+**Shubham Maurya (shubhammauryask)** - App developer/Backend Developer [https://github.com/shubhammauryask].
+
+**Krishnakant Yadav (Kk-0010)** - Full stack developer [https://github.com/Kk-0010]
+
+### License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-markdown
-Copy code
 
-### Changes made:
-- **Frontend note**: Added a section about the frontend, which will be developed later.
-- **Dependencies**: Updated the "Technologies Used" section to reflect your updated dependencies.
-- **Cloudinary, connect-mongo, cookie-parser, etc.**: Added details about additional dependencies in the technologies section.
+
+  
+

@@ -2,11 +2,6 @@ import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
 
 const sendMail = async (req) => {
-
-    const{email}= req.session.userDetails;
-    if (!email) {
-        throw new Error("Email is missing from session details");
-    }
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 465,
@@ -21,13 +16,12 @@ const sendMail = async (req) => {
     const hashedOtp = await bcrypt.hash(otp.toString(), 10);
     // console.log("Hashed OTP:", hashedOtp);
 
-    const otpExpiry = Date.now() + 5 * 60 * 1000; // OTP expires in 5 minutes
+    const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
     req.session.otp = { code: hashedOtp, expiry: otpExpiry };
+    // console.log("This is the value if req.session.otp:", otp);
 
     const recipients = [
-        "mh6912641@gmail.com",
-        "rajaryankumar26april@gmail.com",
-        "krishnakantyadav853@gmail.com",
+        "mh6912641@gmail.com"
     ];
 
     const results = [];
@@ -36,7 +30,7 @@ const sendMail = async (req) => {
         try {
             const info = await transporter.sendMail({
                 from: '"Developers 👻" <ha7496154@gmail.com>', // sender address
-                to: email, // single recipient
+                to: recipient, // single recipient
                 subject: "Your OTP Verification Code", // Subject line
                 html: `<h1 style="color: blue;">Welcome to Our Service!</h1>
                        <p style="font-size: 18px;">Your verification code for changing your password is <strong>${otp}</strong></p>` // HTML body

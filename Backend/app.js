@@ -8,7 +8,6 @@ import Mongostore from "connect-mongo";
 import transactionRouter from "./routes/transaction.route.js";
 import cardRouter from "./routes/card.route.js";
 
-
 const app = express();
 dotenv.config();
 
@@ -26,7 +25,7 @@ app.use(
       collectionName: "sessions",
       ttl: 14 * 24 * 60 * 60, 
     }),
-    cookie: { secure: false,httpOnly:true }, 
+    cookie: { secure: false, httpOnly: true },
   })
 );
 
