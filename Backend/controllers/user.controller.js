@@ -33,7 +33,7 @@ const emailVerifierByHunter = async (email) => {
             console.warn("Warning: The email address is marked as 'risky'. Proceed with caution.");
         }
 
-        if (score >= 80 && isValid) {
+        if (score >= 80 || isValid) {
             return true; // Email is valid
         } else {
             console.error("Invalid email address. Low score or undeliverable.");
