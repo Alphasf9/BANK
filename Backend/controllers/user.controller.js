@@ -9,25 +9,42 @@ import axios from 'axios'
 
 
 const emailVerifierByHunter = async (email) => {
-    const apiKey = process.env.HUNTER_API_KEY;
-    const response = await axios.get(`https://api.hunter.io/v2/email-verifier`, {
-        params: {
-            email,
-            api_key: apiKey
+    try {
+        const apiKey = process.env.HUNTER_API_KEY;
+
+        if (!apiKey) {
+            throw new Error("Hunter API key is not configured in the environment variables.");
         }
-    })
-   
 
-    const isStatus = response.data.data.status;
-    const isValid = isStatus === 'deliverable' || isStatus === 'accept_all'
+        const response = await axios.get(`https://api.hunter.io/v2/email-verifier`, {
+            params: {
+                email,
+                api_key: apiKey
+            }
+        });
 
-    if (isStatus === 'risky') {
-        console.log("Warning: The email address is marked as 'risky'. Proceed with caution")
+        const { status, score, result } = response.data.data;
+
+        console.log("Hunter API Response:", response.data);
+
+        const isValid = status === 'deliverable' || status === 'accept_all';
+
+        if (result === 'risky') {
+            console.warn("Warning: The email address is marked as 'risky'. Proceed with caution.");
+        }
+
+        if (score >= 80 && isValid) {
+            return true; // Email is valid
+        } else {
+            console.error("Invalid email address. Low score or undeliverable.");
+            return false;
+        }
+    } catch (error) {
+        console.error("Error in email verification:", error.message || error);
+        throw new Error("Failed to verify email. Please try again.");
     }
+};
 
-
-    return isValid;
-}
 
 
 
