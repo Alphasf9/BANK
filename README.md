@@ -81,17 +81,29 @@ npm install
 Create a .env file in the backend directory and add the following environment variables:
 
 PORT: Port where the server will run (default: 8000).
+
 MONGO_URI: MongoDB connection string.
+
 ACCESS_TOKEN_SECRET: Secret for access token generation.
+
 ACCESS_TOKEN_EXPIRY: Expiry time for the access token (default: 1d).
+
 REFRESH_TOKEN_SECRET: Secret for refresh token generation.
+
 REFRESH_TOKEN_EXPIRY: Expiry time for the refresh token (default: 10d).
+
 CLOUDINARY_CLOUD_NAME: Cloud name for Cloudinary image storage.
+
 CLOUDINARY_API_KEY: API key for Cloudinary.
-CLOUDINARY_API_SECRET: API secret for Cloudinary.
-SESSION_SECRET_KEY: Secret key for session management.
+
+CLOUDINARY_API_SECRET: API secret for Cloudinary
+
+SESSION_SECRET_KEY: Secret key for session management
+
 NODEMAILER_GMAIL_USERNAME: Gmail username for Nodemailer.
+
 NODEMAILER_GMAIL_PASSWORD: Gmail password for Nodemailer.
+
 
 
 
@@ -112,30 +124,37 @@ OR
 We welcome contributions to improve this project! To contribute, follow these steps:
 
 1.Fork the repository by clicking the Fork button at the top-right corner of this page.
-2.Clone your fork to your local machine: **git clone https://github.com/your-username/BANK.git**
+
+2.Clone your fork to your local machine: **git clone https://github.com/your-username/BANK.git
+
 3.Create a new branch for your feature or bugfix: **git checkout -b feature-branch**
+
 4.Make your changes.
+
 5.Commit your changes: **git commit -m 'Add new feature or fix bug'**
+
 6.Push your changes to your forked repository: **git push origin feature-branch**
+
 7.Open a pull request on GitHub, and describe the changes you have made.
+
 
 
 
 ### Contributors:
 
-MOHD HASEEB AI (Alphasf9) - Full stack developer [https://github.com/Alphasf9]
-Aryan Kumar (Aryan-Kumar-7) - Full stack developer [https://github.com/Aryan-Kumar-7]
-Shubham Maurya (shubhammauryask) - App developer/Backend Developer [https://github.com/shubhammauryask]
-Krishnakant Yadav (Kk-0010) - Full stack developer [https://github.com/Kk-0010]
+**MOHD HASEEB AI (Alphasf9)** - Full stack developer [https://github.com/Alphasf9
+
+**Aryan Kumar (Aryan-Kumar-7)** - Full stack developer [https://github.com/Aryan-Kumar-7].
+
+**Shubham Maurya (shubhammauryask)** - App developer/Backend Developer [https://github.com/shubhammauryask].
+
+**Krishnakant Yadav (Kk-0010)** - Full stack developer [https://github.com/Kk-0010]
 
 ### License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 
-### Key Updates:
-- **Environment Variables**: Added a section for the `.env` file configuration based on the provided keys (without the actual secret values).
-- **Frontend**: Mentioned again that it will be created later.
-- **Contributors**: Added their profile links.
+
   
 
