@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
 
 const sendMail = async (req) => {
-   const email= req.session.userDetails.email
+    const email = req.session.userDetails.email
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 465,

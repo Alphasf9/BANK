@@ -4,6 +4,33 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import bcrypt from "bcrypt";
 import { shouldResetLoginAttempts } from "../utils/helper.js";
 import sendMail from "../utils/mailVerification.js";
+import axios from 'axios'
+
+
+
+const emailVerifierByHunter = async (email) => {
+    const apiKey = process.env.HUNTER_API_KEY;
+    const response = await axios.get(`https://api.hunter.io/v2/email-verifier`, {
+        params: {
+            email,
+            api_key: apiKey
+        }
+    })
+   
+
+    const isStatus = response.data.data.status;
+    const isValid = isStatus === 'deliverable' || isStatus === 'accept_all'
+
+    if (isStatus === 'risky') {
+        console.log("Warning: The email address is marked as 'risky'. Proceed with caution")
+    }
+
+
+    return isValid;
+}
+
+
+
 
 const genrateAccessTokenRefreshToken = async (userId) => {
     const user = await User.findById(userId);
@@ -50,6 +77,15 @@ const registerUser = async (req, res) => {
         if (!firstName || !lastName || !email || !phoneNo || !userPassword || !accountType || !branchName || !branchCode || !ifscCode || !accountPassword) {
             return res.status(400).json({ message: "All required fields must be provided." });
         }
+
+        const emailVerified = await emailVerifierByHunter(email)
+
+        if (!emailVerified) {
+            return res.status(400).json({ message: "Invaild email address, please provide a valid email address." });
+        }
+
+
+
         const photoLocalPath = req.file?.path;
         console.log("Photo local path:", photoLocalPath);
         if (!photoLocalPath) {
