@@ -4,6 +4,50 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import bcrypt from "bcrypt";
 import { shouldResetLoginAttempts } from "../utils/helper.js";
 import sendMail from "../utils/mailVerification.js";
+import axios from 'axios'
+
+
+
+const emailVerifierByHunter = async (email) => {
+    try {
+        const apiKey = process.env.HUNTER_API_KEY;
+
+        if (!apiKey) {
+            throw new Error("Hunter API key is not configured in the environment variables.");
+        }
+
+        const response = await axios.get(`https://api.hunter.io/v2/email-verifier`, {
+            params: {
+                email,
+                api_key: apiKey
+            }
+        });
+
+        const { status, score, result } = response.data.data;
+
+        console.log("Hunter API Response:", response.data);
+
+        const isValid = status === 'deliverable' || status === 'accept_all';
+
+        if (result === 'risky') {
+            console.warn("Warning: The email address is marked as 'risky'. Proceed with caution.");
+        }
+
+        if (score >= 80 || isValid) {
+            return true; // Email is valid
+        } else {
+            console.error("Invalid email address. Low score or undeliverable.");
+            return false;
+        }
+    } catch (error) {
+        console.error("Error in email verification:", error.message || error);
+        throw new Error("Failed to verify email. Please try again.");
+    }
+};
+
+
+
+
 
 const genrateAccessTokenRefreshToken = async (userId) => {
     const user = await User.findById(userId);
@@ -50,6 +94,15 @@ const registerUser = async (req, res) => {
         if (!firstName || !lastName || !email || !phoneNo || !userPassword || !accountType || !branchName || !branchCode || !ifscCode || !accountPassword) {
             return res.status(400).json({ message: "All required fields must be provided." });
         }
+
+        const emailVerified = await emailVerifierByHunter(email)
+
+        if (!emailVerified) {
+            return res.status(400).json({ message: "Invaild email address, please provide a valid email address." });
+        }
+
+
+
         const photoLocalPath = req.file?.path;
         console.log("Photo local path:", photoLocalPath);
         if (!photoLocalPath) {

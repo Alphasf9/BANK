@@ -4,14 +4,22 @@ Welcome to the **Bank Application** repository! This is a full-fledged backend b
 
 ## Table of Contents
 
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Installation Instructions](#installation-instructions)
-- [Configuration](#configuration)
-- [Running the Backend](#running-the-backend)
-- [Contributing](#contributing)
-- [License](#license)
+- [Bank Application](#bank-application)
+  - [Table of Contents](#table-of-contents)
+  - [Project Overview](#project-overview)
+    - [Key Features (Backend Only):](#key-features-backend-only)
+    - [Frontend (To Be Created)](#frontend-to-be-created)
+  - [Features](#features)
+  - [Technologies Used](#technologies-used)
+    - [Backend:](#backend)
+    - [Development:](#development)
+  - [Installation Instructions](#installation-instructions)
+    - [Install Backend Dependencies:](#install-backend-dependencies)
+    - [Environment Configuration:](#environment-configuration)
+    - [Running the Backend](#running-the-backend)
+    - [Contribution:](#contribution)
+    - [Contributors:](#contributors)
+    - [License](#license)
 
 ## Project Overview
 
@@ -142,7 +150,7 @@ We welcome contributions to improve this project! To contribute, follow these st
 
 ### Contributors:
 
-**MOHD HASEEB AI (Alphasf9)** - Full stack developer [https://github.com/Alphasf9
+**MOHD HASEEB AI (Alphasf9)** - Full stack developer [https://github.com/Alphasf9]
 
 **Aryan Kumar (Aryan-Kumar-7)** - Full stack developer [https://github.com/Aryan-Kumar-7].
 
