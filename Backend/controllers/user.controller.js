@@ -103,6 +103,7 @@ const registerUser = async (req, res) => {
 
 
 
+
         const photoLocalPath = req.file?.path;
         console.log("Photo local path:", photoLocalPath);
         if (!photoLocalPath) {
@@ -144,6 +145,11 @@ const registerUser = async (req, res) => {
                 nomineeContact
             }
         };
+
+
+        console.log("Session Data Set:", req.session.userDetails);
+
+        console.log("Session After Assignment:", req.session);
 
         await sendMail(req);
 
@@ -492,8 +498,19 @@ const sendOtp = async (req, res) => {
 
 const checkOtpForVerification = async (req, res) => {
     try {
-        const { otp } = req.body;
+        console.log("Session in OTP Route:", req.session.userDetails);
+        console.log("Session :", req.session);
+
+        const  {otp}  = req.body;
+        console.log(otp)
         const sessionOtp = req.session.otp;
+
+        console.log("Session id", req.session.id)
+        console.log("Session otp", req.session.otp)
+
+        if (!req.session.userDetails) {
+            return res.status(401).json({ message: "Session expired or user not registered." });
+        }
 
         if (!sessionOtp) {
             return res.status(401).json({ message: "OTP session has expired or does not exist" });

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { assets } from '../assets/assets'
+import axios from 'axios'
 
 const Register = () => {
 
-    const [currStep, setCurrStep] = useState(0); // Step tracker
+    const [currStep, setCurrStep] = useState(0); 
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -22,6 +23,7 @@ const Register = () => {
         zip: "",
         country: "",
         userPassword: "",
+        photo: null,
 
         accountType: "",
         accountPassword: "",
@@ -30,8 +32,110 @@ const Register = () => {
         ifscCode: "",
         nomineeName: "",
         nomineeContact: "",
-        nomineeRelation: ""
+        nomineeRelation: "",
+        otp: ""
     });
+
+    const handleFileChange = (e) => {
+        setFormData({
+            ...formData,
+            photo: e.target.files[0]
+        })
+    }
+
+
+
+
+
+    const [isOtpVerified, setIsOtpVerified] = useState(false);
+    const [otp, setOtp] = useState('');
+
+    const [isOtpSent, setIsOtpSent] = useState(false);
+
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const formDataToSend = new FormData();
+
+        Object.keys(formData).forEach((key) => {
+            if (key !== 'photo') {
+                formDataToSend.append(key, formData[key])
+            }
+        })
+
+        if (formData.photo) {
+            formDataToSend.append('photo', formData.photo)
+        }
+
+
+        try {
+            console.log("Cookies before request: ", document.cookie);
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/v1/user/register`, formDataToSend, {
+                
+                headers: {
+                    'Content-Type': 'multipart/form-data'} ,
+                    withCredentials: true
+                 
+            });
+                console.log("Cookies after request: ", document.cookie);
+            console.log(response.data);
+            console.log("This is my response", response)
+            if (response.data.status === 200) {
+                alert('OTP has been sent to you email.Please check and verify');
+                setIsOtpSent(true)
+            }
+
+
+        } catch (error) {
+            console.error('Error during registration:', error);
+            alert('Something went wrong. Please try again.');
+        }
+
+    };
+    const handleOtpVerification = async () => {
+        try {
+            console.log("OTP to be sent:", formData.otp); 
+            console.log("Cookies before request:", document.cookie);
+            
+            const response = await axios.post(
+                `${import.meta.env.VITE_BASE_URL}/api/v1/user/verifyOtp`,
+                { otp: formData.otp },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true, 
+                }
+            );
+    
+            console.log("Response received:", response);
+            
+            if (response.data.status === 201) {
+                const data = response.data;
+                console.log("Data:", data);
+    
+                localStorage.setItem("accessToken", data.accessToken);
+                localStorage.setItem("refreshToken", data.refreshToken);
+    
+                alert("OTP verified successfully!");
+                setFormData({ ...formData, otp: "" });
+                setIsOtpVerified(true);
+            } else {
+                console.log("Unexpected Response:", response.data);
+                alert("Invalid OTP. Please try again.");
+            }
+        } catch (error) {
+           
+            console.error("Error occurred during OTP verification:", error.response?.data || error.message);
+            alert("Something went wrong. Please try again.");
+        }
+    };
+    
+    
+
+
+
 
     const handleNext = () => {
         if (currStep < 4) {
@@ -46,6 +150,8 @@ const Register = () => {
     };
 
 
+
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -58,7 +164,7 @@ const Register = () => {
     return (
         <div className="m-auto mt-7 mb-7 border rounded-lg w-[90%] md:w-[50%] shadow-lg p-6 bg-white overflow-auto">
             <h1 className="flex justify-center mb-7 font-bold text-2xl text-gray-700">Register</h1>
-            <form>
+            <form onSubmit={handleSubmit}>
 
                 {currStep === 0 && (
                     <div>
@@ -68,11 +174,15 @@ const Register = () => {
                                 <label htmlFor="user-img">
                                     <img
                                         className="w-16 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200 transition"
-                                        src={assets.upload_area}
+                                        src={formData.photo ? URL.createObjectURL(formData.photo) : assets.upload_area}
                                         alt="Upload"
                                     />
                                 </label>
-                                <input type="file" id="user-img" hidden />
+                                <input type="file"
+                                    id="user-img" hidden
+                                    onChange={handleFileChange}
+                                    accept='image/*'
+                                />
                                 <p className="text-sm text-gray-600">Upload<br /> photo</p>
                             </div>
 
@@ -84,12 +194,18 @@ const Register = () => {
                                             className="border rounded-lg bg-gray-50 px-3 py-2 w-full hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                             type="text"
                                             placeholder="First Name"
+                                            name='firstName'
+                                            value={formData.firstName}
+                                            onChange={handleInputChange}
                                             required
                                         />
                                         <input
                                             className="border rounded-lg bg-gray-50 px-3 py-2 w-full hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                             type="text"
                                             placeholder="Last Name"
+                                            name='lastName'
+                                            value={formData.lastName}
+                                            onChange={handleInputChange}
                                         />
                                     </div>
                                 </div>
@@ -99,8 +215,11 @@ const Register = () => {
                                     <input
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400 mt-2"
                                         type="email"
+                                        name='email'
                                         placeholder="email@example.com"
                                         required
+                                        value={formData.email}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
                             </div>
@@ -114,6 +233,9 @@ const Register = () => {
                                         className="border rounded-lg bg-gray-50 px-3 py-2 mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
                                         placeholder="Phone Number"
+                                        name='phoneNo'
+                                        value={formData.phoneNo}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
 
@@ -123,6 +245,9 @@ const Register = () => {
                                         className="border rounded-lg bg-gray-50 px-3 py-2 mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
                                         placeholder="Aadhar ID"
+                                        name='aadhar_id'
+                                        value={formData.aadhar_id}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
                             </div>
@@ -133,12 +258,18 @@ const Register = () => {
                                     <input
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="date"
+                                        value={formData.dob}
+                                        name='dob'
+                                        onChange={handleInputChange}
                                     />
                                 </div>
 
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Gender</label>
                                     <select
+                                        name='gender'
+                                        value={formData.gender}
+                                        onChange={handleInputChange}
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400">
                                         <option value="">Select Gender</option>
                                         <option value="Male">Male</option>
@@ -150,6 +281,9 @@ const Register = () => {
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Marital Status</label>
                                     <select
+                                        name='maritalStatus'
+                                        value={formData.maritalStatus}
+                                        onChange={handleInputChange}
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400">
                                         <option value="">Select</option>
                                         <option value="Single">Single</option>
@@ -163,7 +297,11 @@ const Register = () => {
                             <div className="flex justify-around w-full flex-wrap gap-4">
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Religion</label>
-                                    <select className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                    <select
+                                        name='religion'
+                                        value={formData.religion}
+                                        onChange={handleInputChange}
+                                        className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400">
                                         <option value="">Select</option>
                                         <option value="Hindu">Hindu</option>
                                         <option value="Muslim">Muslim</option>
@@ -175,16 +313,22 @@ const Register = () => {
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Occupation</label>
                                     <input
+                                        name='occupation'
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
+                                        value={formData.occupation}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
 
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Nationality</label>
                                     <input
+                                        name='nationality'
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
+                                        value={formData.nationality}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
                             </div>
@@ -196,36 +340,57 @@ const Register = () => {
                     <div>
                         <h3 className='text-xl ml-7 mb-3'>Address</h3>
                         <div className="flex justify-around w-full flex-wrap mt-5 gap-4">
-                            <div className="w-full md:w-[40%]">
+                            {/* <div className="w-full md:w-[40%]">
                                 <label className="text-lg text-gray-700">House No</label>
-                                <input className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
-                            </div>
+                                <input
+                                    className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
+                            </div> */}
                             <div className="w-full md:w-[40%]">
                                 <label className="text-lg text-gray-700">Street</label>
-                                <input className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
+                                <input
+                                    name='street'
+                                    value={formData.street}
+                                    onChange={handleInputChange}
+                                    className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
                             </div>
                         </div>
 
                         <div className="flex justify-around w-full flex-wrap gap-4 mt-5">
                             <div className="w-full md:w-[40%]">
                                 <label className="text-lg text-gray-700">City</label>
-                                <input className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
+                                <input
+                                    name='city'
+                                    value={formData.city}
+                                    onChange={handleInputChange}
+                                    className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
                             </div>
                             <div className="w-full md:w-[40%]">
                                 <label className="text-lg text-gray-700">Zip</label>
-                                <input className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
+                                <input
+                                    name='zip'
+                                    value={formData.zip}
+                                    onChange={handleInputChange}
+                                    className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
                             </div>
                         </div>
 
                         <div className="flex justify-around w-full flex-wrap gap-4 mt-5">
                             <div className="w-full md:w-[40%]">
                                 <label className="text-lg text-gray-700">State</label>
-                                <input className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
+                                <input
+                                    name='state'
+                                    value={formData.state}
+                                    onChange={handleInputChange}
+                                    className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
                             </div>
 
                             <div className="w-full md:w-[40%]">
                                 <label className="text-lg text-gray-700">Country</label>
-                                <input className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
+                                <input
+                                    name='country'
+                                    value={formData.country}
+                                    onChange={handleInputChange}
+                                    className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="text" />
                             </div>
                         </div>
                     </div>
@@ -239,7 +404,11 @@ const Register = () => {
                                 <div className="flex justify-around w-full flex-wrap mt-5 gap-4">
                                     <div className="w-full md:w-[40%]">
                                         <label className="text-lg text-gray-700">Account Type</label>
-                                        <select className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                        <select
+                                            name='accountType'
+                                            value={formData.accountType}
+                                            onChange={handleInputChange}
+                                            className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400">
                                             <option value="">Select</option>
                                             <option value="Saving">Saving</option>
                                             <option value="Current">Current</option>
@@ -249,6 +418,9 @@ const Register = () => {
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Branch Name</label>
                                     <input
+                                        name='branchName'
+                                        value={formData.branchName}
+                                        onChange={handleInputChange}
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
                                     />
@@ -257,6 +429,9 @@ const Register = () => {
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Branch Code</label>
                                     <input
+                                        name='branchCode'
+                                        value={formData.branchCode}
+                                        onChange={handleInputChange}
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
                                     />
@@ -265,6 +440,9 @@ const Register = () => {
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">IFSC Code</label>
                                     <input
+                                        name='ifscCode'
+                                        value={formData.ifscCode}
+                                        onChange={handleInputChange}
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
                                     />
@@ -275,6 +453,9 @@ const Register = () => {
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Nominee Name</label>
                                     <input
+                                        name='nomineeName'
+                                        value={formData.nomineeName}
+                                        onChange={handleInputChange}
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
                                     />
@@ -283,6 +464,9 @@ const Register = () => {
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Nominee Relation</label>
                                     <input
+                                        name='nomineeRelation'
+                                        value={formData.nomineeRelation}
+                                        onChange={handleInputChange}
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
                                     />
@@ -291,6 +475,9 @@ const Register = () => {
                                 <div className="w-full md:w-[30%]">
                                     <label className="text-lg text-gray-700">Nominee Contact</label>
                                     <input
+                                        name='nomineeContact'
+                                        value={formData.nomineeContact}
+                                        onChange={handleInputChange}
                                         className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                                         type="text"
                                     />
@@ -306,43 +493,91 @@ const Register = () => {
                         <div className='flex flex-col justify-center items-center mt-5'>
                             <div className="flex flex-col w-full md:w-[40%]">
                                 <label className="text-lg text-gray-700">User Password</label>
-                                <input className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="password" />
+                                <input
+                                    name='userPassword'
+                                    value={formData.userPassword}
+                                    onChange={handleInputChange}
+                                    className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="password" />
                             </div>
 
                             <div className="flex flex-col w-full md:w-[40%]">
                                 <label className="text-lg text-gray-700">Account Password</label>
-                                <input className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="password" />
+                                <input
+                                    name='accountPassword'
+                                    value={formData.accountPassword}
+                                    onChange={handleInputChange}
+                                    className="border rounded-lg bg-gray-50 px-3 py-2 w-full mt-2 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400" type="password" />
                             </div>
                         </div>
                     </div>
                 )}
 
                 <div className="flex justify-between mt-10">
-                    {currStep > 0 && (
-                        <button
-                            type="button"
-                            className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                            onClick={handlePrev}
-                        >
-                            Back
-                        </button>
-                    )}
-                    {currStep < 4 ? (
-                        <button
-                            type="button"
-                            className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                            onClick={handleNext}
-                        >
-                            Next
-                        </button>
-                    ) : (
-                        <button
-                            type="submit"
-                            className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                        >
-                            Submit
-                        </button>
-                    )}
+                    <div className="flex justify-between mt-10">
+                        <div className="flex justify-between mt-10">
+                            {currStep > 0 && (
+                                <button
+                                    type="button"
+                                    className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                                    onClick={handlePrev}
+                                >
+                                    Back
+                                </button>
+                            )}
+
+                            {currStep < 4 && !isOtpVerified ? (
+                                <button
+                                    type="button"
+                                    className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    onClick={handleNext}
+                                >
+                                    Next
+                                </button>
+                            ) : null}
+
+                            {currStep === 4 && (
+                                <div className="flex flex-col md:flex-row items-center gap-5 mt-5">
+                                    <input
+                                        type="text"
+                                        className="border rounded-lg bg-gray-50 px-3 py-2 w-full md:w-[40%] hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        placeholder="Enter OTP"
+                                        value={formData.otp}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, otp: e.target.value })
+                                        }}
+                                    />
+                                   
+                                    <button
+                                        type="button"
+                                        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                        onClick={handleSubmit}
+                                    >
+                                        Send OTP
+                                    </button>
+                                   
+                                    <button
+                                        type="button"
+                                        className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                                        onClick={handleOtpVerification}
+                                    >
+                                        Verify OTP
+                                    </button>
+                                </div>
+                            )}
+
+                            {currStep === 4 && isOtpVerified && (
+                                <div className="mt-5 text-green-600 text-lg font-semibold">
+                                    Registration complete. Thank you!
+                                </div>
+                            )}
+                        </div>
+
+                    </div>
+
+
+
+
+
                 </div>
             </form>
         </div>
