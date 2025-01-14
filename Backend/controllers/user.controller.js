@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { shouldResetLoginAttempts } from "../utils/helper.js";
 import sendMail from "../utils/mailVerification.js";
 import axios from 'axios'
+import { TempUser } from "../models/tempusers.model.js";
 
 
 
@@ -25,7 +26,7 @@ const emailVerifierByHunter = async (email) => {
 
         const { status, score, result } = response.data.data;
 
-        console.log("Hunter API Response:", response.data);
+        // console.log("Hunter API Response:", response.data);
 
         const isValid = status === 'deliverable' || status === 'accept_all';
 
@@ -60,7 +61,6 @@ const genrateAccessTokenRefreshToken = async (userId) => {
     return { accessToken, refreshToken };
 };
 
-// Register a new user and create an associated account
 const registerUser = async (req, res) => {
     try {
         const {
@@ -87,7 +87,9 @@ const registerUser = async (req, res) => {
             ifscCode,     // New field for account creation
             nomineeName,    // New field for account creation
             nomineeRelation,    // New field for account creation
-            nomineeContact     // New field for account creation
+            nomineeContact,
+            otp,
+            otpExpiry
         } = req.body;
 
 
@@ -115,41 +117,59 @@ const registerUser = async (req, res) => {
         const hashedAccountPassword = await Account.hashAccPassword(accountPassword);
 
 
-
-        req.session.userDetails = {
-            firstName,
-            lastName,
+        const tempUser = await TempUser.create({
             email,
+            fullName: {
+                firstName,
+                lastName
+            },
+            userPassword: hashedPassword,
             phoneNo,
             dob,
             gender,
             aadhar_id,
-            userPassword: hashedPassword,
-            street,
-            city,
-            state,
-            photo: photo.url,
-            zip,
-            country,
+            address: {
+                street,
+                city,
+                state,
+                zip,
+                country
+            },
             maritalStatus,
             occupation,
             nationality,
+            photo: photo.url,
+            otp,
+            otpExpiry,
             accountDetails: {
                 accountType,
                 accountPassword: hashedAccountPassword,
-                branchName,
-                branchCode,
-                ifscCode,
-                nomineeName,
-                nomineeRelation,
-                nomineeContact
+                branchDetails: {
+                    branchName,
+                    branchCode,
+                    ifscCode
+                },
+                balance: 0.0,
+                nominee: {
+                    nomineeName,
+                    nomineeRelation,
+                    nomineeContact
+                }
             }
-        };
+        });
 
 
-        console.log("Session Data Set:", req.session.userDetails);
+        // console.log("this is my email", email);
 
-        console.log("Session After Assignment:", req.session);
+        console.log(hashedPassword)
+
+
+        await tempUser.save();
+
+
+        // console.log("Details are temporarily stored ", tempUser);
+
+        // console.log("My send mail function ", sendMail(req));
 
         await sendMail(req);
 
@@ -495,137 +515,110 @@ const sendOtp = async (req, res) => {
 }
 
 
-
 const checkOtpForVerification = async (req, res) => {
     try {
-        console.log("Session in OTP Route:", req.session.userDetails);
-        console.log("Session :", req.session);
-
-        const  {otp}  = req.body;
-        console.log(otp)
-        const sessionOtp = req.session.otp;
-
-        console.log("Session id", req.session.id)
-        console.log("Session otp", req.session.otp)
-
-        if (!req.session.userDetails) {
-            return res.status(401).json({ message: "Session expired or user not registered." });
-        }
-
-        if (!sessionOtp) {
-            return res.status(401).json({ message: "OTP session has expired or does not exist" });
-        }
+        const { otp } = req.body;
+        console.log("Checking OTP for verification", otp);
 
         if (!otp) {
             return res.status(400).json({ message: "OTP is required" });
         }
 
-        const { code: hashedOtp, expiry } = sessionOtp;
+        const tempUser = await TempUser.findOne().select('+userPassword +accountDetails.accountPassword');
 
-        if (Date.now() > expiry) {
+        if (!tempUser) {
+            return res.status(400).json({ message: "Invalid OTP or expired OTP" });
+        }
+
+        if (Date.now() > tempUser.otpExpiry) {
             return res.status(401).json({ message: "OTP expired" });
         }
 
-        const isMatch = await bcrypt.compare(otp.toString(), hashedOtp);
+        const userDetails = tempUser;
+        const { aadhar_id, userPassword } = userDetails;
 
-        if (isMatch) {
-            const userDetails = req.session.userDetails;
+        const existingUser = await User.findOne({ aadhar_id });
 
-            if (!userDetails) {
-                return res.status(400).json({ message: "User details not found in session" });
-            }
-
-            const hashedPassword = userDetails.userPassword;
-            const accountDetails = userDetails.accountDetails;
-
-            if (!accountDetails) {
-                return res.status(400).json({ message: "Account details are missing in session" });
-            }
-
-
-
-            const user = await User.create({
-                fullName: { firstName: userDetails.firstName, lastName: userDetails.lastName },
-                email: userDetails.email,
-                phoneNo: userDetails.phoneNo,
-                dob: userDetails.dob,
-                gender: userDetails.gender,
-                aadhar_id: userDetails.aadhar_id,
-                photo: userDetails.photo,
-                address: {
-                    street: userDetails.street,
-                    city: userDetails.city,
-                    state: userDetails.state,
-                    zip: userDetails.zip,
-                    country: userDetails.country || "INDIA"
-                },
-                maritalStatus: userDetails.maritalStatus,
-                occupation: userDetails.occupation,
-                nationality: userDetails.nationality,
-                userPassword: hashedPassword
-            });
-            const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(user._id);
-
-
-            const accountNumber = `ACC${Date.now()}`;
-            const account = await Account.create({
-                accountHolder: user._id,
-                accountNumber,
-                accountType: accountDetails.accountType,
-                accountPassword: accountDetails.accountPassword,
-                branchDetails: {
-                    branchCode: accountDetails.branchCode,
-                    branchName: accountDetails.branchName,
-                    ifscCode: accountDetails.ifscCode
-                },
-                balance: 0.0,
-                nominee: {
-                    nomineeName: accountDetails.nomineeName,
-                    nomineeRelation: accountDetails.nomineeRelation,
-                    nomineeContact: accountDetails.nomineeContact
-                }
-            });
-
-            req.session.userDetails = null;
-            req.session.otp = null;
-
-            return res.status(201).json({
-                message: "User and account created successfully",
-                user: {
-                    _id: user._id,
-                    fullName: user.fullName,
-                    email: user.email,
-                    phoneNo: user.phoneNo,
-                    photo: user.photo.url,
-                    dob: user.dob,
-                    gender: user.gender,
-                    aadhar_id: user.aadhar_id,
-                    address: user.address,
-                    maritalStatus: user.maritalStatus,
-                    occupation: user.occupation,
-                    nationality: user.nationality,
-                },
-                account: {
-                    accountNumber: account.accountNumber,
-                    accountType: account.accountType,
-                    branchDetails: account.branchDetails,
-                    balance: account.balance,
-                    nominee: account.nominee
-                },
-                accessToken,
-                refreshToken
-            });
-        } else {
-            return res.status(400).json({ message: "OTP is incorrect" });
+        if (existingUser) {
+            return res.status(400).json({ message: "Aadhar ID already exists" });
         }
+
+        const hashedPassword = userPassword;
+
+
+        const user = await User.create({
+            fullName: { firstName: userDetails.fullName.firstName, lastName: userDetails.fullName.lastName },
+            email: userDetails.email,
+            phoneNo: userDetails.phoneNo,
+            dob: userDetails.dob,
+            gender: userDetails.gender,
+            aadhar_id: userDetails.aadhar_id,
+            photo: userDetails.photo,
+            address: userDetails.address,
+            maritalStatus: userDetails.maritalStatus,
+            occupation: userDetails.occupation,
+            nationality: userDetails.nationality,
+            userPassword: hashedPassword,
+        });
+        const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(user._id);
+
+
+        const accountDetails = userDetails.accountDetails;
+        const accountNumber = `ACC${Date.now()}`;
+
+        const account = await Account.create({
+            accountHolder: user._id,
+            accountNumber,
+            accountType: accountDetails.accountType,
+            accountPassword: accountDetails.accountPassword,
+            branchDetails: {
+                branchName: accountDetails.branchDetails.branchName,
+                branchCode: accountDetails.branchDetails.branchCode,
+                ifscCode: accountDetails.branchDetails.ifscCode,
+            },
+            balance: 0.0,
+            nominee: {
+                nomineeName: accountDetails.nominee.nomineeName,
+                nomineeRelation: accountDetails.nominee.nomineeRelation,
+                nomineeContact: accountDetails.nominee.nomineeContact,
+            },
+        });
+
+        await TempUser.deleteOne({ otp });
+
+        console.log("After deletion", TempUser)
+
+        return res.status(201).json({
+            message: "User and account created successfully",
+            user: {
+                _id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                phoneNo: user.phoneNo,
+                photo: user.photo.url,
+                dob: user.dob,
+                gender: user.gender,
+                aadhar_id: user.aadhar_id,
+                address: user.address,
+                maritalStatus: user.maritalStatus,
+                occupation: user.occupation,
+                nationality: user.nationality,
+            },
+            account: {
+                accountNumber: account.accountNumber,
+                accountType: account.accountType,
+                branchDetails: account.branchDetails,
+                balance: account.balance,
+                nominee: account.nominee,
+            },
+            accessToken,
+            refreshToken
+        });
     } catch (error) {
         console.error("Error during OTP verification:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 };
-
-
-
 
 
 

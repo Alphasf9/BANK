@@ -4,20 +4,20 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
     blockUser, changePassword, checkOtpForVerification, getCurrentUser,
     loginUser, logoutUser, registerUser,
-     updateAccountDetails, updatePersonalDetails, updateUserPhoto
+    updateAccountDetails, updatePersonalDetails, updateUserPhoto
 } from "../controllers/user.controller.js";
 import { limiter } from "../middlewares/rateLimit.js";
 
 const router = Router();
 
-router.post("/register",limiter, upload.single("photo"), registerUser);
-router.post("/login",limiter, loginUser);
-router.post("/logout",limiter, verifyJWT, logoutUser);
-router.get("/getcurrentuser",limiter, verifyJWT, getCurrentUser);
-router.put("/change-password",limiter, verifyJWT, changePassword);
-router.put("/update-details",limiter, verifyJWT, updatePersonalDetails);
-router.post("/update-account",limiter, verifyJWT, updateAccountDetails);
-router.post("/update-photo",limiter, verifyJWT, upload.single("photo"), updateUserPhoto);
+router.post("/register", upload.single("photo"), registerUser);
+router.post("/login", limiter, loginUser);
+router.post("/logout", limiter, verifyJWT, logoutUser);
+router.get("/getcurrentuser", limiter, verifyJWT, getCurrentUser);
+router.put("/change-password", limiter, verifyJWT, changePassword);
+router.put("/update-details", limiter, verifyJWT, updatePersonalDetails);
+router.post("/update-account", limiter, verifyJWT, updateAccountDetails);
+router.post("/update-photo", limiter, verifyJWT, upload.single("photo"), updateUserPhoto);
 
 router.post("/block-user", blockUser);
 
