@@ -79,13 +79,13 @@ const registerUser = async (req, res) => {
             occupation,
             nationality,
             userPassword,
-            accountType, 
-            accountPassword, 
-            branchName,  
-            branchCode,  
-            ifscCode,     
-            nomineeName,    
-            nomineeRelation,    
+            accountType,
+            accountPassword,
+            branchName,
+            branchCode,
+            ifscCode,
+            nomineeName,
+            nomineeRelation,
             nomineeContact,
             otp,
             otpExpiry
@@ -549,6 +549,8 @@ const checkOtpForVerification = async (req, res) => {
             userPassword: hashedPassword,
         });
         const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(user._id);
+        const options = { httpOnly: true, secure: true };
+        res.cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken,options);
 
 
         const accountDetails = userDetails.accountDetails;

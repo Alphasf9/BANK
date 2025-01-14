@@ -1,26 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import axios from "axios";
 
 const Login = () => {
     const [formData, setFormData] = useState({
-        email: '',
-        aadhar_id: '',
-        userPassword: '',
+        email: "",
+        aadhar_id: "",
+        userPassword: "",
     });
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('Form Submitted:', formData);
-        // Add login logic here
+    const handleSubmit = async (e) => {
+        e.preventDefault(); 
+        console.log("Form Submitted:", formData);
+    
+        try {
+            const { email, aadhar_id, userPassword } = formData;
+            const response = await axios.post(
+                `${import.meta.env.VITE_BASE_URL}/api/v1/user/login`,
+                { email, aadhar_id, userPassword },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+    
+            if (response.status === 200 && response.data.accessToken) {
+                const data = response.data;
+                console.log("Login Successful:", data);
+    
+                // Store tokens in local storage
+                localStorage.setItem("accessToken", data.accessToken);
+                localStorage.setItem("refreshToken", data.refreshToken);
+    
+                alert("Login successful!");
+                setFormData({ email: "", aadhar_id: "", userPassword: "" }); // Reset form
+            } else {
+                // Handle unexpected success responses without tokens
+                alert("Unexpected response. Please try again.");
+                console.log("Unexpected Response:", response.data);
+            }
+        } catch (error) {
+            const errorMessage =
+                error.response?.data?.message || "Something went wrong. Please try again.";
+            console.error("Error during login:", errorMessage);
+            alert(errorMessage);
+        }
     };
+    
 
     return (
         <div className="m-auto mt-7 mb-7 border rounded-lg w-[90%] md:w-[40%] shadow-lg p-6 bg-white overflow-auto">
-            <h1 className="flex justify-center mb-7 font-bold text-2xl text-gray-700">Login</h1>
+            <h1 className="flex justify-center mb-7 font-bold text-2xl text-gray-700">
+                Login
+            </h1>
             <form onSubmit={handleSubmit}>
                 <div className="flex flex-col mb-6">
                     <label className="text-lg text-gray-700 mb-2">Email</label>
