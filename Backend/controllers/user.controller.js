@@ -26,7 +26,6 @@ const emailVerifierByHunter = async (email) => {
 
         const { status, score, result } = response.data.data;
 
-        // console.log("Hunter API Response:", response.data);
 
         const isValid = status === 'deliverable' || status === 'accept_all';
 
@@ -80,13 +79,13 @@ const registerUser = async (req, res) => {
             occupation,
             nationality,
             userPassword,
-            accountType, // New field for account creation
-            accountPassword, // New field for account creation
-            branchName,  // New field for account creation
-            branchCode,  // New field for account creation
-            ifscCode,     // New field for account creation
-            nomineeName,    // New field for account creation
-            nomineeRelation,    // New field for account creation
+            accountType, 
+            accountPassword, 
+            branchName,  
+            branchCode,  
+            ifscCode,     
+            nomineeName,    
+            nomineeRelation,    
             nomineeContact,
             otp,
             otpExpiry
@@ -107,12 +106,10 @@ const registerUser = async (req, res) => {
 
 
         const photoLocalPath = req.file?.path;
-        console.log("Photo local path:", photoLocalPath);
         if (!photoLocalPath) {
             return res.status(400).json({ message: "Photo file is required." });
         }
         const photo = await uploadOnCloudinary(photoLocalPath);
-        console.log("Photo URL:", photo.url);
         const hashedPassword = await bcrypt.hash(userPassword, 10);
         const hashedAccountPassword = await Account.hashAccPassword(accountPassword);
 
@@ -159,17 +156,13 @@ const registerUser = async (req, res) => {
         });
 
 
-        // console.log("this is my email", email);
 
-        console.log(hashedPassword)
 
 
         await tempUser.save();
 
 
-        // console.log("Details are temporarily stored ", tempUser);
 
-        // console.log("My send mail function ", sendMail(req));
 
         await sendMail(req);
 
@@ -304,13 +297,10 @@ const getCurrentUser = async (req, res) => {
 
 const changePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
-    console.log(req.body);
     const user = await User.findById(req.user?._id).select("+userPassword");
-    console.log(user);
 
 
     const isPasswordCorrect = await user.passwordCorrect(oldPassword);
-    console.log(isPasswordCorrect);
 
 
     if (!isPasswordCorrect) {
@@ -485,7 +475,6 @@ const blockUser = async (req, res) => {
 
         await user.save();
 
-        console.log("Login Attempts: ", user.loginAttempts);
 
         if (user.loginAttempts >= 3) {
             user.blocked = true;
@@ -518,7 +507,6 @@ const sendOtp = async (req, res) => {
 const checkOtpForVerification = async (req, res) => {
     try {
         const { otp } = req.body;
-        console.log("Checking OTP for verification", otp);
 
         if (!otp) {
             return res.status(400).json({ message: "OTP is required" });
@@ -586,7 +574,6 @@ const checkOtpForVerification = async (req, res) => {
 
         await TempUser.deleteOne({ otp });
 
-        console.log("After deletion", TempUser)
 
         return res.status(201).json({
             message: "User and account created successfully",

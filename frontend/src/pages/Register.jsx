@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { assets } from '../assets/assets'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 const Register = () => {
 
-    const [currStep, setCurrStep] = useState(0); 
+    const [currStep, setCurrStep] = useState(0);
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -35,6 +36,10 @@ const Register = () => {
         nomineeRelation: "",
         otp: ""
     });
+
+
+    const navigate = useNavigate();
+
 
     const handleFileChange = (e) => {
         setFormData({
@@ -70,17 +75,13 @@ const Register = () => {
 
 
         try {
-            console.log("Cookies before request: ", document.cookie);
+
             const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/v1/user/register`, formDataToSend, {
-                
+
                 headers: {
-                    'Content-Type': 'multipart/form-data'} ,
-                    withCredentials: true
-                 
+                    'Content-Type': 'multipart/form-data'
+                },
             });
-                console.log("Cookies after request: ", document.cookie);
-            console.log(response.data);
-            console.log("This is my response", response)
             if (response.data.status === 200) {
                 alert('OTP has been sent to you email.Please check and verify');
                 setIsOtpSent(true)
@@ -95,44 +96,38 @@ const Register = () => {
     };
     const handleOtpVerification = async () => {
         try {
-            console.log("OTP to be sent:", formData.otp); 
-            console.log("Cookies before request:", document.cookie);
-            
             const response = await axios.post(
                 `${import.meta.env.VITE_BASE_URL}/api/v1/user/verifyOtp`,
                 { otp: formData.otp },
                 {
                     headers: {
                         "Content-Type": "application/json",
-                    },
-                    withCredentials: true, 
+                    }
                 }
             );
-    
-            console.log("Response received:", response);
-            
-            if (response.data.status === 201) {
+
+            if (response.status === 201) {
                 const data = response.data;
-                console.log("Data:", data);
-    
+
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
-    
+
                 alert("OTP verified successfully!");
                 setFormData({ ...formData, otp: "" });
                 setIsOtpVerified(true);
+                navigate('/login')
             } else {
                 console.log("Unexpected Response:", response.data);
                 alert("Invalid OTP. Please try again.");
             }
         } catch (error) {
-           
+
             console.error("Error occurred during OTP verification:", error.response?.data || error.message);
             alert("Something went wrong. Please try again.");
         }
     };
-    
-    
+
+
 
 
 
@@ -546,7 +541,7 @@ const Register = () => {
                                             setFormData({ ...formData, otp: e.target.value })
                                         }}
                                     />
-                                   
+
                                     <button
                                         type="button"
                                         className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -554,7 +549,7 @@ const Register = () => {
                                     >
                                         Send OTP
                                     </button>
-                                   
+
                                     <button
                                         type="button"
                                         className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
