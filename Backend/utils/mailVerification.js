@@ -1,8 +1,15 @@
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
+import { TempUser } from '../models/tempusers.model.js';
 
 const sendMail = async (req) => {
-    const email = req.session.userDetails.email
+   
+    if (!req.body || !req.body.email) {
+        console.error('Email not provided in request body');
+        return { error: 'Email is required' };
+    }
+    const email = req.body.email;
+
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 465,
@@ -13,14 +20,30 @@ const sendMail = async (req) => {
         },
     });
 
-    const otp = Math.floor(Math.random() * 900000) + 100000; // 6-digit OTP
+    const otp = Math.floor(Math.random() * 900000) + 100000; 
     const hashedOtp = await bcrypt.hash(otp.toString(), 10);
 
-    const otpExpiry = Date.now() + 20 * 60 * 1000; // OTP expires in 10 minutes
-    req.session.otp = { code: hashedOtp, expiry: otpExpiry };
-    console.log("This is is a new session otp " + req.session.otp.code)
+    const otpExpiry = Date.now() + 10 * 60 * 1000; 
 
-    const recipients = ["mh6912641@gmail.com"];
+    const tempUser = await TempUser.findOne({ email });
+
+
+    if (tempUser) {
+        tempUser.otp = hashedOtp;
+        tempUser.otpExpiry = otpExpiry;
+        await tempUser.save();
+    }
+
+    else {
+        const newUser = new TempUser({
+            email,
+            otp: hashedOtp,
+            otpExpiry,
+        });
+        await newUser.save();
+    }
+
+    const recipients = [email];
 
     const results = [];
 

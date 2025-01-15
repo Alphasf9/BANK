@@ -1,8 +1,6 @@
-import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
 
-const userSchema = new mongoose.Schema({
+const tempUserSchema = new mongoose.Schema({
 
     fullName: {
         firstName: {
@@ -19,7 +17,6 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
         lowercase: true
     },
 
@@ -42,7 +39,7 @@ const userSchema = new mongoose.Schema({
     aadhar_id: {
         type: String,
         required: true,
-        unique: true  // By KK
+        unique: true
     },
 
     address: {
@@ -83,18 +80,12 @@ const userSchema = new mongoose.Schema({
         required: true
     },
 
-    religion: {
-        type: String,
-        enum: ["Islam", "Hinduism", "Buddhism", "Christianity", "Jainism", "Sikhism"],
-        required: true
-    },
-
     nationality: {
         type: String,
         required: true
     },
 
-    photo: { // from cloudinary
+    photo: {
         type: String,
         required: true
     },
@@ -105,57 +96,72 @@ const userSchema = new mongoose.Schema({
         select: false
     },
 
-    loginAttempts: {
-        type: Number,
-        default: 0
+    otp: {
+        type: String
     },
 
-    lastFailedLogin: {
+    otpExpiry: {
         type: Date
     },
 
     blocked: {
         type: Boolean,
         default: false
+    },
+
+    accountDetails: {
+        accountNumber: {
+            type: String,
+            unique: true,
+        },
+        accountType: {
+            type: String,
+            enum: ["Saving", "Current"],
+            required: true
+        },
+        branchDetails: {
+            branchName: {
+                type: String,
+                required: true
+            },
+            branchCode: {
+                type: String,
+                required: true
+            },
+            ifscCode: {
+                type: String,
+                required: true
+            }
+        },
+        balance: {
+            type: Number,
+            required: true,
+            default: 0.0
+        },
+        nominee: {
+            nomineeName: {
+                type: String,
+                required: true
+            },
+            nomineeRelation: {
+                type: String,
+                required: true
+            },
+            nomineeContact: {
+                type: String,
+                required: true
+            }
+        },
+        accountPassword: {
+            type: String,
+            required: true,
+            select:false
+        }
     }
 
 }, { timestamps: true });
 
 
-userSchema.statics.hashPassword = async function (userPassword) {
-    return await bcrypt.hash(userPassword, 10);
-}
+tempUserSchema.index({otpExpiry:1}, {expireAfterSeconds: 60})
 
-
-userSchema.methods.passwordCorrect = async function (userPassword) {
-    return await bcrypt.compare(userPassword, this.userPassword)// comparing password
-}
-
-
-userSchema.methods.genrateAccessToken = function () {
-    return jwt.sign(
-        {
-            _id: this._id,
-            email: this.email,
-            fullName: this.fullName
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
-        }
-    )
-}
-
-userSchema.methods.genrateRefreshToken = function () {
-    return jwt.sign(
-        {
-            _id: this._id
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        {
-            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
-        }
-    )
-}
-
-export const User = mongoose.model("User", userSchema);
+export const TempUser = mongoose.model("TempUserSchema", tempUserSchema);
