@@ -1,7 +1,8 @@
-import  { useState } from "react";
+import  { useState ,useContext} from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { UserDataContext } from "../context/UserContext";
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ const Login = () => {
 
     const navigate = useNavigate();
 
+    const {user,setUser}= useContext(UserDataContext)
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -19,7 +22,6 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault(); 
-        console.log("Form Submitted:", formData);
     
         try {
             const { email, aadhar_id, userPassword } = formData;
@@ -36,16 +38,17 @@ const Login = () => {
             if (response.status === 200 && response.data.accessToken) {
                 const data = response.data;
 
+                setUser(data.user);
+
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
     
                 toast.success("Login successful!");
 
-                navigate('/')
+                navigate('/dashboard')
 
                 setFormData({ email: "", aadhar_id: "", userPassword: "" }); // Reset form
             } else {
-                // Handle unexpected success responses without tokens
                 toast.error("Unexpected response. Please try again.");
                 console.log("Unexpected Response:", response.data);
             }

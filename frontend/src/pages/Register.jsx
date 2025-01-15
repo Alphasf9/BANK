@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { assets } from '../assets/assets'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { UserDataContext } from '../context/UserContext'
+
 
 const Register = () => {
 
@@ -42,6 +44,9 @@ const Register = () => {
     const navigate = useNavigate();
 
 
+    const { user, setUser } = useContext(UserDataContext);
+
+
     const handleFileChange = (e) => {
         setFormData({
             ...formData,
@@ -54,7 +59,7 @@ const Register = () => {
 
 
     const [isOtpVerified, setIsOtpVerified] = useState(false);
-  
+
 
     const [isOtpSent, setIsOtpSent] = useState(false);
 
@@ -110,6 +115,7 @@ const Register = () => {
 
             if (response.status === 201) {
                 const data = response.data;
+                setUser(data.user);
 
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
@@ -584,7 +590,7 @@ const Register = () => {
                     )}
                 </div>
             </form>
-            {currStep === 0 &&(
+            {currStep === 0 && (
                 <p className='mt-5'>Already have an account? <span className='text-blue-500 cursor-pointer' onClick={() => navigate('/login')}>Login here</span></p>
             )}
         </div>

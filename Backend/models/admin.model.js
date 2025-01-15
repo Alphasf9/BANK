@@ -14,17 +14,16 @@ const adminSchema = new mongoose.Schema({
         }
     },
 
-    contact: {
-        email: {
-            type: String,
-            required: true,
-            unique: true,
-            lowercase: true
-        },
-        phoneNo: {
-            type: String,
-            required: true
-        }
+
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true
+    },
+    phoneNo: {
+        type: String,
+        required: true
     },
 
     branch: {
@@ -38,7 +37,7 @@ const adminSchema = new mongoose.Schema({
         required: true,
         select: false
     },
-    
+
     photo: { // from cloudinary
         type: String,
     },
@@ -47,7 +46,7 @@ const adminSchema = new mongoose.Schema({
         type: Date,
     },
 
-},{timestamps: true});
+}, { timestamps: true });
 
 adminSchema.statics.hashPassword = async function (adminPassword) {
     return await bcrypt.hash(adminPassword, 10);

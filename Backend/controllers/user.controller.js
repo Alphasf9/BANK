@@ -191,9 +191,9 @@ const loginUser = async (req, res) => {
         }).select("+userPassword");
 
 
-        if (user.blocked) {
-            return res.status(403).json({ message: "Your account has been previously blocked. Please contact customer support." });
-        }
+        // if (user.blocked) {
+        //     return res.status(403).json({ message: "Your account has been previously blocked. Please contact customer support." });
+        // }
 
 
         if (!user) {
@@ -251,26 +251,31 @@ const loginUser = async (req, res) => {
 
 
 const logoutUser = async (req, res) => {
-    await User.findByIdAndUpdate(
-        req.user._id,
-        {
-            $set: {
-                refreshToken: undefined
+    try {
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $set: {
+                    refreshToken: undefined
+                }
+            },
+            {
+                new: true
             }
-        },
-        {
-            new: true
+        )
+        const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(req.user._id);
+
+        const option = {
+            httpOnly: true,
+            secure: true
         }
-    )
-    const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(req.user._id);
 
-    const option = {
-        httpOnly: true,
-        secure: true
+        res.clearCookie("accessToken", accessToken, option).clearCookie("refreshToken", refreshToken, option);
+        return res.status(200).json({ user: {}, message: "User LoggedOut Successfully" })
+    } catch (error) {
+        console.error("Error during logout:", error);
+        res.status(500).json({ message: "Internal server error." });
     }
-
-    res.clearCookie("accessToken", accessToken, option).clearCookie("refreshToken", refreshToken, option);
-    return res.status(200).json({ user: {}, message: "User LoggedOut Successfully" })
 
 }
 
@@ -550,7 +555,7 @@ const checkOtpForVerification = async (req, res) => {
         });
         const { accessToken, refreshToken } = await genrateAccessTokenRefreshToken(user._id);
         const options = { httpOnly: true, secure: true };
-        res.cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken,options);
+        res.cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options);
 
 
         const accountDetails = userDetails.accountDetails;
