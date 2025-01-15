@@ -6,8 +6,6 @@ const UserLogout = () => {
 const accessToken= localStorage.getItem('accessToken');
 const refreshToken= localStorage.getItem('refreshToken');
 const navigate = useNavigate();
-    console.log('access token:', accessToken);
-    console.log('refresh token:', refreshToken);
 
 
     if (!accessToken || !refreshToken) {
