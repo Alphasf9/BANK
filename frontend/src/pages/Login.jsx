@@ -1,5 +1,7 @@
 import  { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -7,6 +9,8 @@ const Login = () => {
         aadhar_id: "",
         userPassword: "",
     });
+
+    const navigate = useNavigate();
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -35,17 +39,20 @@ const Login = () => {
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
     
-                alert("Login successful!");
-                setFormData({ email: "", aadhar_id: "", userPassword: "" }); 
+                toast.success("Login successful!");
+
+                navigate('/')
+
+                setFormData({ email: "", aadhar_id: "", userPassword: "" }); // Reset form
             } else {
-                alert("Unexpected response. Please try again.");
+                // Handle unexpected success responses without tokens
+                toast.error("Unexpected response. Please try again.");
                 console.log("Unexpected Response:", response.data);
             }
         } catch (error) {
-            const errorMessage =
-                error.response?.data?.message || "Something went wrong. Please try again.";
+            const errorMessage = error.response?.data?.message || "Something went wrong. Please try again.";
             console.error("Error during login:", errorMessage);
-            alert(errorMessage);
+            toast.error(errorMessage);
         }
     };
     
@@ -102,6 +109,7 @@ const Login = () => {
                     Login
                 </button>
             </form>
+            <p className='mt-5'>Create an account? <span className='text-blue-500 cursor-pointer' onClick={() => navigate('/register')}>Click here</span></p>
         </div>
     );
 };
