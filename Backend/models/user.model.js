@@ -84,6 +84,12 @@ const userSchema = new mongoose.Schema({
         required: true
     },
 
+    religion: {
+        type: String,
+        enum: ["Islam", "Hinduism", "Buddhism", "Christianity", "Jainism", "Sikhism"],
+        required: true
+    },
+
     nationality: {
         type: String,
         required: true
