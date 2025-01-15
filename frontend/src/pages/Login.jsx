@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import axios from "axios";
 
 const Login = () => {
@@ -31,16 +31,13 @@ const Login = () => {
     
             if (response.status === 200 && response.data.accessToken) {
                 const data = response.data;
-                console.log("Login Successful:", data);
-    
-                // Store tokens in local storage
+
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
     
                 alert("Login successful!");
-                setFormData({ email: "", aadhar_id: "", userPassword: "" }); // Reset form
+                setFormData({ email: "", aadhar_id: "", userPassword: "" }); 
             } else {
-                // Handle unexpected success responses without tokens
                 alert("Unexpected response. Please try again.");
                 console.log("Unexpected Response:", response.data);
             }

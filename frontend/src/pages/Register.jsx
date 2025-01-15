@@ -53,7 +53,7 @@ const Register = () => {
 
 
     const [isOtpVerified, setIsOtpVerified] = useState(false);
-    const [otp, setOtp] = useState('');
+  
 
     const [isOtpSent, setIsOtpSent] = useState(false);
 
