@@ -137,6 +137,8 @@ SESSION_SECRET_KEY: Secret key for session management.
 NODEMAILER_GMAIL_USERNAME: Gmail username for Nodemailer.
 
 NODEMAILER_GMAIL_PASSWORD: Gmail password for Nodemailer.
+
+HUNTER_API_KEY: API Key for Hunter to verify emails.
 ```
 
 ### Running the Backend:
