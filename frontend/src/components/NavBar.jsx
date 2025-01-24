@@ -14,28 +14,28 @@ const NavBar = () => {
 
             <div className='flex items-center'>
                 {/* for navlinks */}
-                <ul className='flex gap-9'>
+                <div className='flex gap-9'>
                     <div className='flex flex-col items-center'>
                         <i className="fa-solid fa-house"></i>
-                        <li><a href="">Home</a></li>
+                        <p>Home</p>
                     </div>
                     <div className='flex flex-col items-center'>
                         <i className="fa-solid fa-user"></i>
-                        <li><a href="">Personal</a></li>
+                        <p>Personal</p>
                     </div>
                     <div className='flex flex-col items-center'>
                         <i className="fa-solid fa-file-invoice"></i>
-                        <li><a href="">Account</a></li>
+                        <p>Account</p>
                     </div>
                     <div className='flex flex-col items-center'>
                         <i className="fa-regular fa-address-card"></i>
-                        <li><a href="">About us</a></li>
+                        <p>About us</p>
                     </div>
                     <div className='flex flex-col items-center'>
                         <i className="fa-solid fa-phone"></i>
-                        <li><a href="">Contact us</a></li>
+                        <p>Contact us</p>
                     </div>
-                </ul>
+                </div>
             </div>
 
             <div className='flex gap-7 items-center'>
