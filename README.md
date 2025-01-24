@@ -177,7 +177,7 @@ We welcome contributions to improve this project! To contribute, follow these st
 2. Clone your fork to your local machine:
 
 ```bash
-git clone https://github.com/your-username/BANK.git
+git clone https://github.com/Alphasf9/BANK.git
 ```
 
 3. Create a new branch for your feature or bugfix:
