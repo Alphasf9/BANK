@@ -2,7 +2,7 @@ import { createContext, useState } from 'react'
 export const UserDataContext = createContext();
 
 
-const UserContext = ({children}) => {
+const UserContext = ({ children }) => {
     const [user, setUser] = useState({
         fullName: {
             firstName: "",
@@ -13,11 +13,13 @@ const UserContext = ({children}) => {
         dob: "",
         gender: "",
         aadhar_id: "",
-        street: "",
-        city: "",
-        state: "",
-        zip: "",
-        country: "",
+        address: {
+            street: "",
+            city: "",
+            state: "",
+            zip: "",
+            country: "",
+        },
         maritalStatus: "",
         occupation: "",
         nationality: "",

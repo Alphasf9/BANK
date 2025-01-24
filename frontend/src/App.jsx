@@ -9,6 +9,7 @@ import NavBar from './components/NavBar'
 import Dashboard from './pages/Dashboard';
 import UserProtectedWrapper from './pages/UserProtectedWrapper';
 import UserLogout from './pages/UserLogout';
+import UserDetails from './components/UserDetails';
 
 function App() {
 
@@ -20,17 +21,21 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
-        <Route path='/dashboard' element={
+        <Route path="/dashboard" element={
           <UserProtectedWrapper>
             <Dashboard />
           </UserProtectedWrapper>
-        } />
+        }
+        >
+          {/* Nested route under /dashboard */}
+          <Route path="user-details" element={<UserDetails />} />
+        </Route>
+        
         <Route path='/user/logout' element={
           <UserProtectedWrapper>
             <UserLogout />
           </UserProtectedWrapper>
         } />
-
 
       </Routes>
     </>
