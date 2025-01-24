@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
     const navigate = useNavigate();
+    const location = useLocation(); // Get the current route
     const [isOpen, setIsOpen] = useState(true); // State to toggle sidebar
 
     const toggleSidebar = () => {
@@ -27,16 +28,22 @@ const Sidebar = () => {
 
             {/* Menu Items */}
             <ul className="mt-7 space-y-4">
-                {menuItems.map((item, index) => (
-                    <li
-                        key={index}
-                        onClick={() => navigate(item.path)}
-                        className="flex items-center gap-4 p-3 cursor-pointer hover:bg-blue-600 rounded"
-                    >
-                        <i className={`${item.icon} text-lg`}></i>
-                        {isOpen && <span>{item.name}</span>}
-                    </li>
-                ))}
+                {menuItems.map((item, index) => {
+                    const isActive = location.pathname === item.path; // Check if the current path matches the menu item's path
+
+                    return (
+                        <li
+                            key={index}
+                            onClick={() => navigate(item.path)}
+                            className={`flex items-center gap-4 p-3 cursor-pointer rounded ${
+                                isActive ? "bg-blue-600 text-white" : "hover:bg-blue-600"
+                            }`}
+                        >
+                            <i className={`${item.icon} text-lg`}></i>
+                            {isOpen && <span>{item.name}</span>}
+                        </li>
+                    );
+                })}
             </ul>
         </div>
     );

@@ -8,6 +8,7 @@ const UserProtectedWrapper = ({ children }) => {
     const accessToken = localStorage.getItem('accessToken')
     const refreshToken = localStorage.getItem('refreshToken')
     const { user, setUser } = useContext(UserDataContext)
+    const { account, setAccount } = useContext(UserDataContext)
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true)
 
@@ -29,6 +30,7 @@ const UserProtectedWrapper = ({ children }) => {
             if (response.status === 200) {
                 const data = response.data;
                 setUser(data.user);
+                setAccount(data.account)
                 setIsLoading(false)
             }
         }).catch(err => {

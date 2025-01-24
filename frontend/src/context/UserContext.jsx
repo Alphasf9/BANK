@@ -8,6 +8,7 @@ const UserContext = ({ children }) => {
             firstName: "",
             lastName: ""
         },
+        photo: "",
         email: "",
         phoneNo: "",
         dob: "",
@@ -25,9 +26,25 @@ const UserContext = ({ children }) => {
         nationality: "",
     })
 
+    const [account, setAccount] = useState({
+        accountNumber: "",
+        accountType: "",
+        balance: "",
+        branchDetails: {
+            branchName: "",
+            branchCode: "",
+            ifscCode: "",
+        },
+        nominee: {
+            nomineeName: "",
+            nomineeRelation: "",
+            nomineeContact: "",
+        }
+    });
+
     return (
         <div>
-            <UserDataContext.Provider value={{ user, setUser }}>
+            <UserDataContext.Provider value={{ user, setUser, account, setAccount }}>
                 {children}
             </UserDataContext.Provider>
         </div>

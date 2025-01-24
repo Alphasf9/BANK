@@ -9,7 +9,7 @@ const Dashboard = () => {
 
             {/* Main Content */}
             <div className="flex-1 bg-gray-100 p-5 overflow-auto">
-                <h1 className="text-2xl font-bold mb-5">Dashboard</h1>
+                <h1 className="text-2xl font-bold mb-5 text-blue-500 flex justify-center items-center">Dashboard</h1>
                 <Outlet />
             </div>
         </div>

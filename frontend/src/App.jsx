@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import UserProtectedWrapper from './pages/UserProtectedWrapper';
 import UserLogout from './pages/UserLogout';
 import UserDetails from './components/UserDetails';
+import AccountDetails from './components/AccountDetails';
 
 function App() {
 
@@ -29,6 +30,7 @@ function App() {
         >
           {/* Nested route under /dashboard */}
           <Route path="user-details" element={<UserDetails />} />
+          <Route path='account-details' element={<AccountDetails />} />
         </Route>
         
         <Route path='/user/logout' element={
