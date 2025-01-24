@@ -182,23 +182,32 @@ const loginUser = async (req, res) => {
         const { email, aadhar_id, userPassword } = req.body;
 
 
-        if (!email || !aadhar_id || !userPassword) {
+        if (!email && !aadhar_id && !userPassword) {
             return res.status(400).json({ message: "All fields are required." });
         }
 
-        const user = await User.findOne({
-            $or: [{ email }, { aadhar_id }]
-        }).select("+userPassword");
+        let query = {};
+        if (email && aadhar_id) {
+            query = { $and: [{ email }, { aadhar_id }] };
+        } else if (email) {
+            query = { email };
+        } else if (aadhar_id) {
+            query = { aadhar_id };
+        } else {
+            return res.status(400).json({ message: "Email or Aadhar ID is required." });
+        }
+
+        const user = await User.findOne(query).select("+userPassword");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
 
 
         // if (user.blocked) {
         //     return res.status(403).json({ message: "Your account has been previously blocked. Please contact customer support." });
         // }
 
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found." });
-        }
         await shouldResetLoginAttempts(user);
 
         const isPasswordMatch = await user.passwordCorrect(userPassword);

@@ -4,6 +4,9 @@ const NavBar = () => {
 
     const navigate = useNavigate();
 
+    const accessToken = localStorage.getItem('accessToken')
+    const refreshToken = localStorage.getItem('refreshToken')
+
     return (
         <div className='bg-blue-500 text-white flex justify-around h-[70px] items-center'>
             <div className='flex gap-4 items-center'>
@@ -38,12 +41,20 @@ const NavBar = () => {
                 </div>
             </div>
 
-            <div className='flex gap-7 items-center'>
-                {/* for login button */}
-                <i className="fa-solid fa-magnifying-glass"></i>
-                <i className="fa-solid fa-location-dot"></i>
-                <button onClick={()=>navigate('/register')} className='bg-white text-black border rounded w-40 h-8'>Create Account</button>
-            </div>
+            {
+                (accessToken && refreshToken) ? (
+
+                    <div className='flex gap-7 items-center'>
+                        <p>Welcome</p>
+                    </div>
+                ) : (
+                    <div className='flex gap-7 items-center'>
+                        <i className="fa-solid fa-magnifying-glass"></i>
+                        <i className="fa-solid fa-location-dot"></i>
+                        <button onClick={() => navigate('/register')} className='bg-white text-black border rounded w-40 h-8'>Create Account</button>
+                    </div>
+                )
+            }
         </div>
     )
 }

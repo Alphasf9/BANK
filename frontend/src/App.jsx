@@ -7,7 +7,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import NavBar from './components/NavBar'
 import Dashboard from './pages/Dashboard';
-import UserProtectedWrapper from './pages/UserProtectedWrapper';
+import UserProtectedWrapper from './ProtectedRoutes/UserProtectedWrapper';
 import UserLogout from './pages/UserLogout';
 
 function App() {

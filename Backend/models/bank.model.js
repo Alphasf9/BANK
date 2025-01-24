@@ -111,9 +111,15 @@ const bankSchema = new mongoose.Schema(
       required: true,
     },
 
-    location: {
-      type: "Point",
-    },
+    
+    location: { 
+      ltd: {
+          type: Number
+      },
+      lng: {
+          type: Number
+      }
+  }
   },
   { timestamps: true }
 );
