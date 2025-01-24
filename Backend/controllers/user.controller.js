@@ -203,6 +203,24 @@ const loginUser = async (req, res) => {
             return res.status(404).json({ message: "User not found." });
         }
 
+        // Check if email or aadhar_id exists in the result
+        if (user) {
+            if (user.email) {
+                console.log('Email exists:', user.email);
+            } else {
+                console.log('Email does not exist');
+            }
+
+            if (user.aadhar_id) {
+                console.log('Aadhar ID exists:', user.aadhar_id);
+            } else {
+                console.log('Aadhar ID does not exist');
+            }
+        } else {
+            console.log('No user found');
+        }
+
+
 
         // if (user.blocked) {
         //     return res.status(403).json({ message: "Your account has been previously blocked. Please contact customer support." });
